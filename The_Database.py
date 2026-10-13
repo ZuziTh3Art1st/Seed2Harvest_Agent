@@ -12,14 +12,9 @@ def init_db():
     conn_buz = get_connection()
     cursor_buz = conn_buz.cursor()
 
-    # FORCE HARD RESET: Drop old tables so the massive dummy dataset can be injected
-    cursor_buz.execute("DROP TABLE IF EXISTS orders_commitment")
-    cursor_buz.execute("DROP TABLE IF EXISTS popia_encrypted_clients")
-    cursor_buz.execute("DROP TABLE IF EXISTS inventory_master")
-
-    # Master inventory table with agronomic parameters
+    # Create tables only if they do not already exist
     cursor_buz.execute("""
-        CREATE TABLE inventory_master (
+        CREATE TABLE IF NOT EXISTS inventory_master (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             product_name TEXT UNIQUE NOT NULL,
             category TEXT NOT NULL,
@@ -30,9 +25,8 @@ def init_db():
         )
     """)
 
-    # POPIA Compliance isolated client table (PII isolation)
     cursor_buz.execute("""
-        CREATE TABLE popia_encrypted_clients (
+        CREATE TABLE IF NOT EXISTS popia_encrypted_clients (
             farmer_id INTEGER PRIMARY KEY AUTOINCREMENT,
             full_name TEXT NOT NULL,
             phone_contact TEXT NOT NULL,
@@ -41,9 +35,8 @@ def init_db():
         )
     """)
 
-    # Transactional order commitment table
     cursor_buz.execute("""
-        CREATE TABLE orders_commitment (
+        CREATE TABLE IF NOT EXISTS orders_commitment (
             order_id INTEGER PRIMARY KEY AUTOINCREMENT,
             farmer_id INTEGER NOT NULL,
             product_name TEXT NOT NULL,
@@ -55,51 +48,52 @@ def init_db():
         )
     """)
 
-    # Inject Baseline Inventory (Boosted by ~675%)
-    seed_inventory_buz = [
-        ("BioBoost 250ml", "Organic Fertilizer", 930, 185.00, "5ml per 1L of water weekly", 1),
-        ("BioBoost 1L", "Organic Fertilizer", 500, 520.00, "20ml per 5L of water bi-weekly", 1),
-        ("HydroCache Granules 500g", "Soil Enhancer", 620, 240.00, "15g per planting hole", 1),
-        ("Carbon+ Soil Activator 5L", "Microbial Soil Treatment", 310, 780.00, "50ml per 10L of water", 1),
-        ("BioShield Pest Repel 500ml", "Biological Pest Protection", 425, 310.00, "10ml per 1L spray solution", 1),
-        ("NitroGrow Pellets 10kg", "Soil Nutrition", 230, 450.00, "100g per square meter", 1)
-    ]
-    cursor_buz.executemany("""
-        INSERT INTO inventory_master 
-        (product_name, category, stock_qty, unit_price, dosage_guideline, ecocert_certified)
-        VALUES (?, ?, ?, ?, ?, ?)
-    """, seed_inventory_buz)
-    
-    # Inject 115 Dummy Users & Transactions for Dashboard Analytics
-    first_names_buz = ["Jan", "Piet", "Johan", "Willem", "Hendrik", "Thabo", "Sipho", "Lungile", "Zanele", "Ashley", "Michael", "Sarah", "David", "Emma", "James"]
-    last_names_buz = ["Smit", "Van Der Merwe", "Botha", "Ndlovu", "Khumalo", "Dlamini", "Venter", "Nel", "Buzuzi", "Nkosi"]
-    locations_buz = ["Stellenbosch, Western Cape", "Paarl, Western Cape", "Malmesbury, Western Cape", "Ceres, Western Cape", "Tzaneen, Limpopo", "Bethlehem, Free State", "Upington, Northern Cape", "Nelspruit, Mpumalanga"]
-    
-    for i in range(115):
-        fname_buz = random.choice(first_names_buz)
-        lname_buz = random.choice(last_names_buz)
-        full_name_buz = f"{fname_buz} {lname_buz}"
-        loc_buz = random.choice(locations_buz)
-        phone_buz = f"0{random.randint(60,84)}{random.randint(1000000,9999999)}"
+    # Safety Check: Only inject massive dummy data if the inventory is totally empty
+    cursor_buz.execute("SELECT COUNT(*) FROM inventory_master")
+    if cursor_buz.fetchone()[0] == 0:
+        seed_inventory_buz = [
+            ("BioBoost 250ml", "Organic Fertilizer", 930, 185.00, "5ml per 1L of water weekly", 1),
+            ("BioBoost 1L", "Organic Fertilizer", 500, 520.00, "20ml per 5L of water bi-weekly", 1),
+            ("HydroCache Granules 500g", "Soil Enhancer", 620, 240.00, "15g per planting hole", 1),
+            ("Carbon+ Soil Activator 5L", "Microbial Soil Treatment", 310, 780.00, "50ml per 10L of water", 1),
+            ("BioShield Pest Repel 500ml", "Biological Pest Protection", 425, 310.00, "10ml per 1L spray solution", 1),
+            ("NitroGrow Pellets 10kg", "Soil Nutrition", 230, 450.00, "100g per square meter", 1)
+        ]
+        cursor_buz.executemany("""
+            INSERT INTO inventory_master 
+            (product_name, category, stock_qty, unit_price, dosage_guideline, ecocert_certified)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, seed_inventory_buz)
         
-        cursor_buz.execute("""
-            INSERT INTO popia_encrypted_clients (full_name, phone_contact, delivery_location)
-            VALUES (?, ?, ?)
-        """, (full_name_buz, phone_buz, loc_buz))
-        farmer_id_buz = cursor_buz.lastrowid
+        first_names_buz = ["Jan", "Piet", "Johan", "Willem", "Hendrik", "Thabo", "Sipho", "Lungile", "Zanele", "Ashley", "Michael", "Sarah", "David", "Emma", "James"]
+        last_names_buz = ["Smit", "Van Der Merwe", "Botha", "Ndlovu", "Khumalo", "Dlamini", "Venter", "Nel", "Buzuzi", "Nkosi"]
+        locations_buz = ["Stellenbosch, Western Cape", "Paarl, Western Cape", "Malmesbury, Western Cape", "Ceres, Western Cape", "Tzaneen, Limpopo", "Bethlehem, Free State", "Upington, Northern Cape", "Nelspruit, Mpumalanga"]
         
-        num_orders_buz = random.randint(1, 5)
-        for _ in range(num_orders_buz):
-            prod_buz = random.choice(seed_inventory_buz)
-            prod_name_buz = prod_buz[0]
-            unit_price_buz = prod_buz[3]
-            qty_buz = random.randint(5, 45)
-            total_cost_buz = unit_price_buz * qty_buz
+        for i in range(115):
+            fname_buz = random.choice(first_names_buz)
+            lname_buz = random.choice(last_names_buz)
+            full_name_buz = f"{fname_buz} {lname_buz}"
+            loc_buz = random.choice(locations_buz)
+            phone_buz = f"0{random.randint(60,84)}{random.randint(1000000,9999999)}"
             
             cursor_buz.execute("""
-                INSERT INTO orders_commitment (farmer_id, product_name, quantity, total_cost)
-                VALUES (?, ?, ?, ?)
-            """, (farmer_id_buz, prod_name_buz, qty_buz, total_cost_buz))
+                INSERT INTO popia_encrypted_clients (full_name, phone_contact, delivery_location)
+                VALUES (?, ?, ?)
+            """, (full_name_buz, phone_buz, loc_buz))
+            farmer_id_buz = cursor_buz.lastrowid
+            
+            num_orders_buz = random.randint(1, 5)
+            for _ in range(num_orders_buz):
+                prod_buz = random.choice(seed_inventory_buz)
+                prod_name_buz = prod_buz[0]
+                unit_price_buz = prod_buz[3]
+                qty_buz = random.randint(5, 45)
+                total_cost_buz = unit_price_buz * qty_buz
+                
+                cursor_buz.execute("""
+                    INSERT INTO orders_commitment (farmer_id, product_name, quantity, total_cost)
+                    VALUES (?, ?, ?, ?)
+                """, (farmer_id_buz, prod_name_buz, qty_buz, total_cost_buz))
 
     conn_buz.commit()
     conn_buz.close()
@@ -161,4 +155,3 @@ def process_order_transaction(farmer_name, phone, location, product_name, quanti
 
 if __name__ == "__main__":
     init_db()
-    print("Database hard reset and populated with 115 dummy users successfully.")
