@@ -26,13 +26,6 @@ st.markdown("""
     html, body, [class*="css"] {
         font-family: 'Plus Jakarta Sans', sans-serif;
     }
-    
-    .stApp { 
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
-        color: #F8FAFC; 
-    }
 
     h1, h2, h3 { 
         font-family: 'Playfair Display', serif; 
@@ -40,16 +33,21 @@ st.markdown("""
         color: #FFFFFF; 
     }
 
-    # Cinematic Hero Section with High-Resolution Photography
+    # Hide default Streamlit header background to preserve immersion
+    header[data-testid="stHeader"] {
+        background-color: transparent !important;
+    }
+
+    # Cinematic Hero Section 
     .cinematic-hero {
         position: relative;
         border-radius: 28px;
-        overflow: hidden;
-        background: rgba(15, 23, 42, 0.4);
-        backdrop-filter: blur(14px);
+        background: rgba(15, 23, 42, 0.35);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
         padding: 4rem 3rem;
         margin-bottom: 2.5rem;
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.15);
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         text-align: center;
     }
@@ -86,9 +84,9 @@ st.markdown("""
 
     # Modern Inputs & Fields
     .stTextInput > div > div > input, .stNumberInput > div > div > input, .stSelectbox > div > div > div {
-        background-color: rgba(30, 41, 59, 0.8) !important; 
+        background-color: rgba(15, 23, 42, 0.75) !important; 
         color: #FFFFFF !important; 
-        border: 1px solid rgba(255, 255, 255, 0.25) !important; 
+        border: 1px solid rgba(255, 255, 255, 0.2) !important; 
         border-radius: 14px !important;
         padding: 0.7rem 1.1rem !important;
     }
@@ -98,7 +96,7 @@ st.markdown("""
     }
 
     .custom-warning {
-        background-color: rgba(16, 185, 129, 0.2); color: #34D399; padding: 18px; border-radius: 16px; margin: 15px 0; font-size: 0.92rem; border: 1px solid rgba(16, 185, 129, 0.5);
+        background-color: rgba(16, 185, 129, 0.15); color: #34D399; padding: 18px; border-radius: 16px; margin: 15px 0; font-size: 0.92rem; border: 1px solid rgba(16, 185, 129, 0.4);
     }
 
     # Action Buttons
@@ -119,18 +117,22 @@ st.markdown("""
         background: linear-gradient(135deg, #059669 0%, #047857 100%);
     }
 
-    # Highly Opaque Immersive Gradient Sidebar
+    # True Transparent Glass Sidebar
     [data-testid="stSidebar"] { 
-        background: linear-gradient(180deg, rgba(6, 9, 15, 0.6) 0%, rgba(15, 23, 42, 0.5) 100%) !important; 
-        border-right: 1px solid rgba(255, 255, 255, 0.15); 
-        backdrop-filter: blur(25px);
+        background-color: rgba(10, 15, 25, 0.25) !important; 
+        border-right: 1px solid rgba(255, 255, 255, 0.1) !important; 
+        backdrop-filter: blur(18px) !important;
+        -webkit-backdrop-filter: blur(18px) !important;
+    }
+    [data-testid="stSidebar"] > div:first-child {
+        background-color: transparent !important;
     }
     .sidebar-title { color: #FFFFFF; font-size: 1.15rem; font-weight: 800; margin-bottom: 2px; }
     .sidebar-subtitle { color: #94A3B8; font-size: 0.72rem; letter-spacing: 2px; margin-bottom: 15px; font-weight: 700; text-transform: uppercase; }
 
     # Glassmorphism Cards
     .quote-box {
-        background: rgba(30, 41, 59, 0.75); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.15); padding: 30px; border-radius: 24px; color: #FFFFFF; margin-top: 20px;
+        background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.15); padding: 30px; border-radius: 24px; color: #FFFFFF; margin-top: 20px;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
     }
     .quote-box table { width: 100%; border-collapse: collapse; margin: 15px 0; }
@@ -149,41 +151,40 @@ st.markdown("""
 
     # Apple-grade Feature Cards
     .feature-card {
-        background: rgba(30, 41, 59, 0.65); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.15); border-top: 3px solid #34D399;
+        background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.15); border-top: 3px solid #34D399;
         padding: 26px; border-radius: 24px; margin-bottom: 18px; height: 100%;
         box-shadow: 0 15px 35px -10px rgba(0,0,0,0.4);
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease;
     }
     .feature-card:hover {
-        transform: translateY(-6px);
+        transform: translateY(-4px);
         box-shadow: 0 25px 50px -12px rgba(16, 185, 129, 0.35);
         border-color: rgba(52, 211, 153, 0.6);
     }
     .feature-card h4 { font-family: 'Playfair Display', serif; color: #FFFFFF; margin: 0 0 10px 0; font-size: 1.25rem; font-weight: 700; }
     .feature-card p { color: #CBD5E1; margin: 0; font-size: 0.92rem; line-height: 1.6; }
 
-    # Clean Catalogue Showcase Cards (No Slow 3D Transitions)
-    .product-showcase-card {
-        background: rgba(30, 41, 59, 0.75);
+    # Fast Loading Clean Glass Catalogue Cards (No Heavy Images)
+    .product-glass-card {
+        background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%);
         backdrop-filter: blur(16px);
         border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 24px;
-        padding: 2rem 1.5rem;
-        text-align: center;
-        box-shadow: 0 20px 40px -15px rgba(0,0,0,0.6);
+        border-radius: 20px;
+        padding: 24px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 15px 35px -10px rgba(0,0,0,0.5);
+        transition: transform 0.2s ease, border-color 0.2s ease;
         position: relative;
-        overflow: hidden;
     }
-
-    .product-image-container {
-        width: 100%;
-        height: 160px;
-        background-size: cover;
-        background-position: center;
-        border-radius: 16px;
-        margin-bottom: 1.2rem;
-        box-shadow: 0 10px 20px rgba(0,0,0,0.4);
-        border: 1px solid rgba(255, 255, 255, 0.15);
+    .product-glass-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(52, 211, 153, 0.5);
+    }
+    .product-glass-card h3 {
+        font-family: 'Playfair Display', serif; 
+        font-size: 1.4rem; 
+        color: #FFFFFF; 
+        margin: 12px 0 8px 0;
     }
 
     # Seamless Immersive Footer
@@ -192,8 +193,8 @@ st.markdown("""
         margin-top: 80px; 
         padding: 30px 0; 
         border-top: 1px solid rgba(255, 255, 255, 0.15); 
-        background: rgba(4, 6, 11, 0.3); 
-        backdrop-filter: blur(10px); 
+        background: rgba(4, 6, 11, 0.4); 
+        backdrop-filter: blur(12px); 
     }
     .footer h4 { font-family: 'Playfair Display', serif; color: #FFFFFF; margin: 0; font-size: 1.1rem; letter-spacing: 1px; font-weight: 700;}
     .footer p { color: #94A3B8; font-size: 0.75rem; letter-spacing: 2px; margin-top: 8px; font-weight: 700;}
@@ -289,31 +290,6 @@ def make_qr_png(data: str, box_size=5) -> bytes:
     return buf.getvalue()
 
 
-# HIGH QUALITY CURATED IMAGE SELECTOR (FILTERING OUT LOW QUALITY ASSETS)
-def get_high_quality_images():
-    high_quality_list = []
-    try:
-        if os.path.exists("images"):
-            all_files = os.listdir("images")
-            for f in all_files:
-                if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp', '.avif')):
-                    # Exclude known lower-quality or unrefined test thumbs
-                    if "67cad4" not in f and "X9" not in f:
-                        high_quality_list.append(os.path.join("images", f))
-    except Exception:
-        pass
-    
-    # Fallback to Unsplash premium high-res photography if local folder lacks pristine assets
-    if not high_quality_list:
-        high_quality_list = [
-            "https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2032&auto=format&fit=crop",
-            "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=2040&auto=format&fit=crop",
-            "https://images.unsplash.com/photo-1511497584788-876761142212?q=80&w=2032&auto=format&fit=crop",
-            "https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=2070&auto=format&fit=crop"
-        ]
-    return high_quality_list
-
-
 def get_image_base64(path):
     if path.startswith("http"):
         return path
@@ -327,16 +303,14 @@ def get_image_base64(path):
         return ""
 
 
-hq_images = get_high_quality_images()
-
-# DEDICATED HIGH-QUALITY BACKGROUND IMAGE ASSIGNMENT PER PAGE
+# UNIQUE HIGH QUALITY IMAGE MAPPING PER PAGE
 page_bg_mapping = {
-    "ONBOARDING": hq_images[0] if len(hq_images) > 0 else "images/maxresdefault.jpg",
-    "CHAT": hq_images[1] if len(hq_images) > 1 else hq_images[0],
-    "CATALOGUE": hq_images[2] if len(hq_images) > 2 else hq_images[0],
-    "RESERVE ORDER": hq_images[3] if len(hq_images) > 3 else hq_images[0],
-    "GLOBAL FEED": hq_images[0] if len(hq_images) > 0 else "images/maxresdefault.jpg",
-    "FEATURES": hq_images[1] if len(hq_images) > 1 else hq_images[0]
+    "ONBOARDING": "images/pexels-tatianasyrikova-3934023.jpg",
+    "CHAT": "images/v2osk-1Z2niiBPg5A-unsplash.jpg",
+    "CATALOGUE": "images/pexels-arndt-peter-bergfeld-151632051-39888320.jpg",
+    "RESERVE ORDER": "images/pietro-de-grandi-T7K4aEPoGGk-unsplash.jpg",
+    "GLOBAL FEED": "images/pexels-richard-pan-5305182-12643137.jpg",
+    "FEATURES": "images/mark-harpur-K2s_YE031CA-unsplash.jpg"
 }
 
 
@@ -542,17 +516,16 @@ with st.sidebar:
         st.rerun()
 
 
-# DETERMINE CURRENT ACTIVE PAGE BACKGROUND DYNAMICALLY
+# DYNAMIC HIGH-RES SCENIC BACKGROUND INJECTION PER PAGE
 current_page_key = page_selection if st.session_state.authenticated else "ONBOARDING"
-selected_bg = page_bg_mapping.get(current_page_key, hq_images[0] if hq_images else "images/maxresdefault.jpg")
+selected_bg = page_bg_mapping.get(current_page_key, "images/maxresdefault.jpg")
 resolved_bg_b64 = get_image_base64(selected_bg)
 
-# Inject dynamic high-res background per page with immersive overlay
 if resolved_bg_b64:
     st.markdown(f"""
     <style>
         .stApp {{
-            background: linear-gradient(rgba(10, 15, 25, 0.4), rgba(10, 15, 25, 0.65)), url('{resolved_bg_b64}') !important;
+            background: linear-gradient(rgba(10, 15, 25, 0.5), rgba(10, 15, 25, 0.8)), url('{resolved_bg_b64}') !important;
             background-size: cover !important;
             background-position: center !important;
             background-attachment: fixed !important;
@@ -561,7 +534,7 @@ if resolved_bg_b64:
     """, unsafe_allow_html=True)
 
 
-# CINEMATIC EDITORIAL HERO HEADER
+# CINEMATIC EDITORIAL HERO HEADER 
 st.markdown("""
 <div class="cinematic-hero">
     <h1>Seed. Intelligence. Harvest.</h1>
@@ -719,27 +692,21 @@ elif page_selection == "CHAT":
             st.caption("The full document can also be downloaded on the RESERVE ORDER page.")
 
 elif page_selection == "CATALOGUE":
-    st.markdown("<div class='section-header'>PRODUCT CATALOGUE & SHOWCASE</div>", unsafe_allow_html=True)
-    st.caption("Explore our professional agricultural formulations presented in a clean grid layout with dedicated high-resolution photography per product.")
+    st.markdown("<div class='section-header'>PRODUCT CATALOGUE</div>", unsafe_allow_html=True)
+    st.caption("Browse our professional agricultural formulations. Rendered instantly with clean, modern glassmorphism.")
 
     cols_grid = st.columns(3)
     for index, row in enumerate(catalog_data):
         p_name, p_cat, p_stock, p_price, p_guide = row[0], row[1], row[2], row[3], row[4]
         
-        # Assign a distinct pristine high-resolution image from our filtered list for each product
-        prod_img = hq_images[index % len(hq_images)] if hq_images else "images/maxresdefault.jpg"
-        img_b64 = get_image_base64(prod_img)
-        bg_style = f"background-image: linear-gradient(180deg, rgba(15,23,42,0.2) 0%, rgba(15,23,42,0.85) 100%), url('{img_b64}');" if img_b64 else "background-color: #1E293B;"
-
         with cols_grid[index % 3]:
             st.markdown(f"""
-            <div class="product-showcase-card">
-                <div class="product-image-container" style="{bg_style}"></div>
+            <div class="product-glass-card">
                 <span style="background: rgba(52, 211, 153, 0.2); color: #34D399; padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;">{p_cat}</span>
-                <h3 style="font-family: 'Playfair Display', serif; margin: 12px 0 6px 0; font-size: 1.25rem; color: #FFFFFF;">{p_name}</h3>
-                <p style="color: #CBD5E1; font-size: 0.82rem; margin-bottom: 12px; line-height: 1.4;"><b>Guideline:</b> {p_guide}</p>
-                <div style="font-size: 1.3rem; font-weight: 800; color: #34D399; margin-bottom: 4px;">ZAR {p_price:.2f}</div>
-                <div style="font-size: 0.75rem; color: #94A3B8; margin-bottom: 15px;">Stock: {p_stock} available</div>
+                <h3>{p_name}</h3>
+                <p style="color: #CBD5E1; font-size: 0.85rem; margin-bottom: 12px; line-height: 1.5;"><b>Guideline:</b> {p_guide}</p>
+                <div style="font-size: 1.35rem; font-weight: 800; color: #34D399; margin-bottom: 4px;">ZAR {p_price:.2f}</div>
+                <div style="font-size: 0.75rem; color: #94A3B8; margin-bottom: 15px; font-weight: 600;">Stock: {p_stock} available</div>
             </div>
             """, unsafe_allow_html=True)
 
