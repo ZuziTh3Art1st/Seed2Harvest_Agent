@@ -12,234 +12,237 @@ from io import BytesIO
 from groq import Groq
 import The_Database as db
 
-# PAGE CONFIG & STYLING
+# PAGE CONFIG 
 st.set_page_config(
     page_title="Seed 2 Harvest | Cinematic Intelligence",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-st.markdown("""
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-
-    # Global Editorial & Atmospheric Design
-    html, body, [class*="css"] {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-    }
-
-    h1, h2, h3 { 
-        font-family: 'Playfair Display', serif; 
-        font-weight: 700; 
-        color: #FFFFFF; 
-    }
-
-    # Hide default Streamlit header background to preserve immersion
-    header[data-testid="stHeader"] {
-        background-color: transparent !important;
-    }
-
-    # Cinematic Hero Section 
-    .cinematic-hero {
-        position: relative;
-        border-radius: 28px;
-        background: rgba(15, 23, 42, 0.35);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        padding: 4rem 3rem;
-        margin-bottom: 2.5rem;
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        text-align: center;
-    }
+# HELPER TO GET ALL IMAGES FROM IMAGES FOLDER
+def get_high_quality_images():
+    high_quality_list = []
+    try:
+        if os.path.exists("images"):
+            all_files = os.listdir("images")
+            for f in all_files:
+                if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp', '.avif')):
+                    # Exclude low-res test thumbs
+                    if "67cad4" not in f and "X9" not in f:
+                        high_quality_list.append(os.path.join("images", f))
+    except Exception:
+        pass
     
-    .cinematic-hero h1 {
-        font-family: 'Playfair Display', serif;
-        font-size: 3.5rem;
-        font-weight: 700;
-        letter-spacing: -0.02em;
-        color: #FFFFFF;
-        margin: 0 0 8px 0;
-    }
+    # Fallback to premium high-res photography if local folder lacks assets
+    if not high_quality_list:
+        high_quality_list = [
+            "https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2032&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=2040&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1511497584788-876761142212?q=80&w=2032&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=2070&auto=format&fit=crop"
+        ]
+    return high_quality_list
 
-    .cinematic-hero p {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        color: #34D399;
-        font-size: 0.95rem;
-        letter-spacing: 4px;
-        font-weight: 700;
-        text-transform: uppercase;
-        margin: 0;
-    }
+def get_image_base64(path):
+    if path.startswith("http"):
+        return path
+    try:
+        with open(path, "rb") as f:
+            b64 = base64.b64encode(f.read()).decode()
+        ext = path.rsplit(".", 1)[-1].lower()
+        mime = "image/png" if ext == "png" else ("image/webp" if ext == "webp" else "image/jpeg")
+        return f"data:{mime};base64,{b64}"
+    except Exception:
+        return ""
 
-    .section-header { 
-        font-family: 'Playfair Display', serif;
-        color: #FFFFFF; 
-        font-size: 1.8rem; 
-        margin-top: 2rem; 
-        margin-bottom: 1.2rem; 
-        font-weight: 700;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        padding-bottom: 10px;
-    }
+hq_images = get_high_quality_images()
 
-    # Modern Inputs & Fields
-    .stTextInput > div > div > input, .stNumberInput > div > div > input, .stSelectbox > div > div > div {
-        background-color: rgba(15, 23, 42, 0.75) !important; 
-        color: #FFFFFF !important; 
-        border: 1px solid rgba(255, 255, 255, 0.2) !important; 
-        border-radius: 14px !important;
-        padding: 0.7rem 1.1rem !important;
-    }
-    .stTextInput > div > div > input:focus { 
-        border-color: #34D399 !important; 
-        box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.3) !important; 
-    }
-
-    .custom-warning {
-        background-color: rgba(16, 185, 129, 0.15); color: #34D399; padding: 18px; border-radius: 16px; margin: 15px 0; font-size: 0.92rem; border: 1px solid rgba(16, 185, 129, 0.4);
-    }
-
-    # Chat Quick Guide UI
-    .chat-quick-guide {
-        background: rgba(15, 23, 42, 0.55);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 16px;
-        padding: 20px;
-        margin-bottom: 25px;
-    }
-    .guide-item {
-        font-size: 0.85rem;
-        color: #E2E8F0;
-        background: rgba(255, 255, 255, 0.08);
-        padding: 8px 14px;
-        border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        display: inline-block;
-        margin-right: 8px;
-        margin-bottom: 8px;
-    }
-
-    # Action Buttons
-    .stButton > button, .stDownloadButton > button, [data-testid="stFormSubmitButton"] > button {
-        background: linear-gradient(135deg, #10B981 0%, #059669 100%); 
-        color: #FFFFFF; 
-        border: none; 
-        border-radius: 14px; 
-        font-weight: 700; 
-        padding: 0.7rem 1.5rem;
-        letter-spacing: 0.5px;
-        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .stButton > button:hover, .stDownloadButton > button:hover, [data-testid="stFormSubmitButton"] > button:hover { 
-        transform: translateY(-2px);
-        box-shadow: 0 12px 25px rgba(16, 185, 129, 0.45);
-        background: linear-gradient(135deg, #059669 0%, #047857 100%);
-    }
-
-    # True Transparent Glass Sidebar (Overriding Light Mode defaults)
-    section[data-testid="stSidebar"] { 
-        background-color: rgba(10, 15, 25, 0.8) !important; 
-        border-right: 1px solid rgba(255, 255, 255, 0.15) !important; 
-        backdrop-filter: blur(20px) !important;
-        -webkit-backdrop-filter: blur(20px) !important;
-    }
-    section[data-testid="stSidebar"] > div {
-        background-color: transparent !important;
-    }
-    # Force sidebar text to be light even in light mode
-    section[data-testid="stSidebar"] .stMarkdown p,
-    section[data-testid="stSidebar"] .stMarkdown div,
-    section[data-testid="stSidebar"] .stRadio label {
-        color: #F8FAFC !important;
-    }
-    .sidebar-title { color: #FFFFFF; font-size: 1.15rem; font-weight: 800; margin-bottom: 2px; }
-    .sidebar-subtitle { color: #94A3B8; font-size: 0.72rem; letter-spacing: 2px; margin-bottom: 15px; font-weight: 700; text-transform: uppercase; }
-
-    # Glassmorphism Cards
-    .quote-box {
-        background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.15); padding: 30px; border-radius: 24px; color: #FFFFFF; margin-top: 20px;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
-    }
-    .quote-box table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-    .quote-box th { text-align: left; color: #34D399; border-bottom: 2px solid rgba(255, 255, 255, 0.2); padding: 12px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; }
-    .quote-box td { padding: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); font-size: 0.92rem; color: #E2E8F0; }
-
-    [data-testid="stForm"] { border: none !important; padding: 0 !important; background: transparent !important; }
-    
-    a.mailto-btn {
-        display: inline-block; background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: #FFFFFF !important; text-decoration: none !important;
-        padding: 12px 24px; border-radius: 14px; font-weight: 700; letter-spacing: 0.5px; font-size: 0.9rem; margin: 8px 0 15px 0;
-        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
-        transition: all 0.2s ease;
-    }
-    a.mailto-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 25px rgba(16, 185, 129, 0.45); }
-
-    # Apple-grade Feature Cards
-    .feature-card {
-        background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.15); border-top: 3px solid #34D399;
-        padding: 26px; border-radius: 24px; margin-bottom: 18px; height: 100%;
-        box-shadow: 0 15px 35px -10px rgba(0,0,0,0.4);
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease;
-    }
-    .feature-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 25px 50px -12px rgba(16, 185, 129, 0.35);
-        border-color: rgba(52, 211, 153, 0.6);
-    }
-    .feature-card h4 { font-family: 'Playfair Display', serif; color: #FFFFFF; margin: 0 0 10px 0; font-size: 1.25rem; font-weight: 700; }
-    .feature-card p { color: #CBD5E1; margin: 0; font-size: 0.92rem; line-height: 1.6; }
-
-    # Fast Loading Clean Glass Catalogue Cards (No Heavy Images)
-    .product-glass-card {
-        background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%);
-        backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 20px;
-        padding: 24px;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 15px 35px -10px rgba(0,0,0,0.5);
-        transition: transform 0.2s ease, border-color 0.2s ease;
-        position: relative;
-    }
-    .product-glass-card:hover {
-        transform: translateY(-4px);
-        border-color: rgba(52, 211, 153, 0.5);
-    }
-    .product-glass-card h3 {
-        font-family: 'Playfair Display', serif; 
-        font-size: 1.4rem; 
-        color: #FFFFFF; 
-        margin: 12px 0 8px 0;
-    }
-
-    # Seamless Immersive Footer
-    .footer { 
-        text-align: center; 
-        margin-top: 80px; 
-        padding: 30px 0; 
-        border-top: 1px solid rgba(255, 255, 255, 0.15); 
-        background: rgba(4, 6, 11, 0.5); 
-        backdrop-filter: blur(12px); 
-    }
-    .footer h4 { font-family: 'Playfair Display', serif; color: #FFFFFF; margin: 0; font-size: 1.1rem; letter-spacing: 1px; font-weight: 700;}
-    .footer p { color: #94A3B8; font-size: 0.75rem; letter-spacing: 2px; margin-top: 8px; font-weight: 700;}
-</style>
-""", unsafe_allow_html=True)
-
-db.init_db()
-
-# SESSION STATE
+# INITIALIZE STATE & ROUTING
 if "authenticated" not in st.session_state: st.session_state.authenticated = False
 if "user_data" not in st.session_state: st.session_state.user_data = {"name": "", "farm": "", "location": "", "email": ""}
 if "messages" not in st.session_state: st.session_state.messages = []
 if "basket" not in st.session_state: st.session_state.basket = {}
 if "last_document" not in st.session_state: st.session_state.last_document = None
 
+# We must check the query params or session state to know what page we are on BEFORE applying CSS
+# Streamlit sidebar execution happens top-down, but we can set a default
+current_page = "ONBOARDING" if not st.session_state.authenticated else st.session_state.get("current_page", "CHAT")
 
-# HELPERS
+page_bg_mapping = {
+    "ONBOARDING": hq_images[0] if len(hq_images) > 0 else "images/maxresdefault.jpg",
+    "CHAT": hq_images[1] if len(hq_images) > 1 else hq_images[0],
+    "CATALOGUE": hq_images[2] if len(hq_images) > 2 else hq_images[0],
+    "RESERVE ORDER": hq_images[3] if len(hq_images) > 3 else hq_images[0],
+    "GLOBAL FEED": hq_images[4] if len(hq_images) > 4 else hq_images[0],
+    "FEATURES": hq_images[5] if len(hq_images) > 5 else hq_images[0]
+}
+
+bg_path = page_bg_mapping.get(current_page, hq_images[0])
+bg_b64 = get_image_base64(bg_path)
+
+# ================= GLOBAL AGGRESSIVE CSS OVERRIDE =================
+st.markdown(f"""
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+    /* 1. Force Dark Mode & Background Image globally */
+    .stApp {{
+        background: linear-gradient(180deg, rgba(6, 9, 15, 0.4) 0%, rgba(6, 9, 15, 0.85) 100%), url('{bg_b64}') !important;
+        background-size: cover !important;
+        background-position: center center !important;
+        background-attachment: fixed !important;
+    }}
+    
+    /* 2. Hide top header band */
+    header[data-testid="stHeader"] {{ background: transparent !important; }}
+
+    /* 3. Force all text to white/off-white to combat Light Mode */
+    html, body, p, span, div, label, h1, h2, h3, h4, h5, h6, li {{
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        color: #F8FAFC !important;
+    }}
+    
+    h1, h2, h3 {{ 
+        font-family: 'Playfair Display', serif !important; 
+        font-weight: 700 !important; 
+    }}
+
+    /* 4. Cinematic Typography Blocks */
+    .main-title {{
+        font-family: 'Playfair Display', serif !important;
+        font-size: 4rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        margin: 2rem 0 0.5rem 0;
+        text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }}
+    .sub-title {{
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        color: #34D399 !important;
+        font-size: 1rem;
+        letter-spacing: 5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 3rem;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }}
+    .section-header {{
+        font-family: 'Playfair Display', serif !important;
+        font-size: 2rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        padding-bottom: 10px;
+        margin: 2rem 0 1.5rem 0;
+    }}
+
+    /* 5. True Transparent Frosted Sidebar */
+    [data-testid="stSidebar"] {{ 
+        background-color: rgba(10, 15, 25, 0.35) !important; 
+        border-right: 1px solid rgba(255, 255, 255, 0.1) !important; 
+        backdrop-filter: blur(25px) !important;
+        -webkit-backdrop-filter: blur(25px) !important;
+    }}
+    [data-testid="stSidebar"] > div:first-child {{ background-color: transparent !important; }}
+    
+    /* 6. Form Inputs & Chat Box */
+    .stTextInput input, .stNumberInput input, .stSelectbox div[data-baseweb="select"], [data-testid="stChatInput"] {{
+        background-color: rgba(15, 23, 42, 0.65) !important; 
+        color: #FFFFFF !important; 
+        border: 1px solid rgba(255, 255, 255, 0.2) !important; 
+        border-radius: 12px !important;
+        backdrop-filter: blur(10px) !important;
+    }}
+    .stTextInput input:focus, [data-testid="stChatInput"]:focus-within {{ 
+        border-color: #34D399 !important; 
+        box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.3) !important; 
+    }}
+
+    /* 7. Action Buttons */
+    .stButton button, .stDownloadButton button, [data-testid="stFormSubmitButton"] button {{
+        background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important; 
+        color: #FFFFFF !important; 
+        border: 1px solid rgba(255,255,255,0.1) !important; 
+        border-radius: 12px !important; 
+        font-weight: 700 !important; 
+        padding: 0.6rem 1.4rem !important;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4) !important;
+        transition: all 0.3s ease !important;
+    }}
+    .stButton button:hover {{ 
+        transform: translateY(-2px) !important;
+        box-shadow: 0 12px 25px rgba(16, 185, 129, 0.4) !important;
+        background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+    }}
+
+    /* 8. Immersive Chat Messages */
+    [data-testid="stChatMessage"] {{
+        background-color: rgba(15, 23, 42, 0.6) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 16px !important;
+        padding: 1.5rem !important;
+        margin-bottom: 1rem !important;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2) !important;
+    }}
+    
+    /* Chat Quick Guide */
+    .chat-quick-guide {{
+        background: rgba(15, 23, 42, 0.45);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 25px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }}
+    .guide-item {{
+        font-size: 0.85rem;
+        background: rgba(255, 255, 255, 0.08);
+        padding: 8px 14px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        display: inline-block;
+        margin: 4px 8px 4px 0;
+    }}
+
+    /* Fast Glass Cards (Catalogue & Features) */
+    .glass-card {{
+        background: rgba(15, 23, 42, 0.55); 
+        backdrop-filter: blur(16px); 
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.15); 
+        border-top: 3px solid #34D399;
+        padding: 26px; 
+        border-radius: 20px; 
+        margin-bottom: 18px; 
+        height: 100%;
+        box-shadow: 0 15px 35px -10px rgba(0,0,0,0.5);
+        transition: transform 0.3s ease, border-color 0.3s ease;
+    }}
+    .glass-card:hover {{
+        transform: translateY(-4px);
+        border-color: rgba(52, 211, 153, 0.6);
+    }}
+
+    /* Document/Quote Box */
+    .quote-box {{
+        background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.15); padding: 30px; border-radius: 20px; margin-top: 20px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+    }}
+    .quote-box table {{ width: 100%; border-collapse: collapse; margin: 15px 0; }}
+    .quote-box th {{ text-align: left; color: #34D399 !important; border-bottom: 1px solid rgba(255, 255, 255, 0.2); padding: 12px; }}
+    .quote-box td {{ padding: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }}
+
+    .custom-warning {{ background-color: rgba(16, 185, 129, 0.15); color: #34D399 !important; padding: 18px; border-radius: 16px; margin: 15px 0; border: 1px solid rgba(16, 185, 129, 0.4); }}
+
+    /* Footer */
+    .footer {{ text-align: center; margin-top: 80px; padding: 30px 0; border-top: 1px solid rgba(255, 255, 255, 0.1); background: rgba(4, 6, 11, 0.6); backdrop-filter: blur(12px); }}
+</style>
+""", unsafe_allow_html=True)
+
+db.init_db()
+
+# ================= HELPERS & LOGIC =================
 BANKS = [
     ("FNB", "https://www.fnb.co.za"),
     ("Standard Bank", "https://www.standardbank.co.za"),
@@ -258,13 +261,9 @@ BENEFICIARY = {
 
 def get_secret(name, default=None):
     val = os.environ.get(name)
-    if val:
-        return val
-    try:
-        return st.secrets[name]
-    except Exception:
-        return default
-
+    if val: return val
+    try: return st.secrets[name]
+    except Exception: return default
 
 class AgriculturalMiddleware:
     SLANG_DICTIONARY = {
@@ -287,26 +286,17 @@ class AgriculturalMiddleware:
             normalized = re.sub(pattern, replacement, normalized, flags=re.IGNORECASE)
         return normalized
 
-
 @st.cache_data(show_spinner=False, ttl=86400)
 def geocode_location(query: str):
-    if not query or not query.strip():
-        return None
+    if not query or not query.strip(): return None
     headers = {"User-Agent": "seed2harvest-streamlit-app/1.0"}
     for q in (query, f"{query}, South Africa"):
         try:
-            r = requests.get(
-                "https://nominatim.openstreetmap.org/search",
-                params={"q": q, "format": "json", "limit": 1},
-                headers=headers, timeout=8
-            )
+            r = requests.get("https://nominatim.openstreetmap.org/search", params={"q": q, "format": "json", "limit": 1}, headers=headers, timeout=8)
             data = r.json()
-            if data:
-                return float(data[0]["lat"]), float(data[0]["lon"]), data[0].get("display_name", q)
-        except Exception:
-            continue
+            if data: return float(data[0]["lat"]), float(data[0]["lon"]), data[0].get("display_name", q)
+        except Exception: continue
     return None
-
 
 def make_qr_png(data: str, box_size=5) -> bytes:
     qr = qrcode.QRCode(version=None, box_size=box_size, border=2)
@@ -317,106 +307,41 @@ def make_qr_png(data: str, box_size=5) -> bytes:
     img.save(buf, format="PNG")
     return buf.getvalue()
 
-
-# HIGH QUALITY CURATED IMAGE SELECTOR
-def get_high_quality_images():
-    high_quality_list = []
-    try:
-        if os.path.exists("images"):
-            all_files = os.listdir("images")
-            for f in all_files:
-                if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp', '.avif')):
-                    if "67cad4" not in f and "X9" not in f:
-                        high_quality_list.append(os.path.join("images", f))
-    except Exception:
-        pass
-    
-    if not high_quality_list:
-        high_quality_list = [
-            "https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2032&auto=format&fit=crop",
-            "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=2040&auto=format&fit=crop",
-            "https://images.unsplash.com/photo-1511497584788-876761142212?q=80&w=2032&auto=format&fit=crop",
-            "https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=2070&auto=format&fit=crop"
-        ]
-    return high_quality_list
-
-
-def get_image_base64(path):
-    if path.startswith("http"):
-        return path
-    try:
-        with open(path, "rb") as f:
-            b64 = base64.b64encode(f.read()).decode()
-        ext = path.rsplit(".", 1)[-1].lower()
-        mime = "image/png" if ext == "png" else ("image/webp" if ext == "webp" else "image/jpeg")
-        return f"data:{mime};base64,{b64}"
-    except Exception:
-        return ""
-
-
-hq_images = get_high_quality_images()
-
-# DEDICATED HIGH-QUALITY BACKGROUND IMAGE ASSIGNMENT PER PAGE
-page_bg_mapping = {
-    "ONBOARDING": hq_images[0] if len(hq_images) > 0 else "images/maxresdefault.jpg",
-    "CHAT": hq_images[1] if len(hq_images) > 1 else hq_images[0],
-    "CATALOGUE": hq_images[2] if len(hq_images) > 2 else hq_images[0],
-    "RESERVE ORDER": hq_images[3] if len(hq_images) > 3 else hq_images[0],
-    "GLOBAL FEED": hq_images[4] if len(hq_images) > 4 else hq_images[0],
-    "FEATURES": hq_images[5] if len(hq_images) > 5 else hq_images[0]
-}
-
-
-# GROQ CLIENT SETUP
 GROQ_API_KEY = get_secret("GROQ_API_KEY")
 groq_client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
 
 catalog_data = db.fetch_inventory()
 price_map = {row[0]: row[3] for row in catalog_data}
-catalog_context = "\n".join([
-    f"- Product: {row[0]} | Category: {row[1]} | Stock: {row[2]} units | Price: R{row[3]:.2f} | Safe Usage: {row[4]}"
-    for row in catalog_data
-])
-
+catalog_context = "\n".join([f"- Product: {row[0]} | Category: {row[1]} | Stock: {row[2]} units | Price: R{row[3]:.2f} | Safe Usage: {row[4]}" for row in catalog_data])
 
 def basket_totals():
     subtotal = sum(price_map.get(p, 0.0) * q for p, q in st.session_state.basket.items() if q > 0)
     vat = subtotal * 0.15
     return subtotal, vat, subtotal + vat
 
-
 def basket_context() -> str:
     items = [(p, q) for p, q in st.session_state.basket.items() if q > 0]
-    if not items:
-        return "The client's basket is currently EMPTY."
+    if not items: return "The client's basket is currently EMPTY."
     lines = [f"- {q}x {p} @ R{price_map.get(p, 0.0):.2f} = R{price_map.get(p, 0.0) * q:.2f}" for p, q in items]
     subtotal, vat, total = basket_totals()
     lines.append(f"Subtotal: R{subtotal:.2f} | VAT (15%): R{vat:.2f} | Total: R{total:.2f}")
     return "\n".join(lines)
 
-
 def set_basket_qty(product_name):
     qty = st.session_state.get(f"cat_{product_name}", 0)
-    if qty and qty > 0:
-        st.session_state.basket[product_name] = int(qty)
-    else:
-        st.session_state.basket.pop(product_name, None)
-
+    if qty and qty > 0: st.session_state.basket[product_name] = int(qty)
+    else: st.session_state.basket.pop(product_name, None)
 
 def clear_basket():
     st.session_state.basket = {}
-    for k in [k for k in st.session_state.keys() if k.startswith("cat_")]:
-        del st.session_state[k]
-
+    for k in [k for k in st.session_state.keys() if k.startswith("cat_")]: del st.session_state[k]
 
 def payment_lines(inv_no, grand_total):
     lines = [f"Payment reference: {inv_no}", f"Amount to pay: R{grand_total:.2f}"]
     filled = [(k, v) for k, v in BENEFICIARY.items() if v]
     lines += [f"{k}: {v}" for k, v in filled]
-    if len(filled) <= 1:
-        lines.append("Full banking details: request from support@seed2harvest.co.za")
+    if len(filled) <= 1: lines.append("Full banking details: request from support@seed2harvest.co.za")
     return lines
-
 
 def generate_and_send(doc_type, location_input, phone, email_input):
     active_items = [(p, q) for p, q in st.session_state.basket.items() if q > 0]
@@ -424,121 +349,41 @@ def generate_and_send(doc_type, location_input, phone, email_input):
     now = pd.Timestamp.now()
     inv_no = f"INV-{now.strftime('%Y%m%d-%H%M%S')}"
     date_str = now.strftime('%Y-%m-%d')
-
     e = html.escape
-    rows_html = "".join(
-        f"<tr><td>{e(p)}</td><td>{q}</td><td>R{price_map.get(p, 0.0):.2f}</td><td>R{price_map.get(p, 0.0) * q:.2f}</td></tr>"
-        for p, q in active_items
-    )
-    rows_text = "\n".join(
-        f"  {q}x {p} @ R{price_map.get(p, 0.0):.2f} = R{price_map.get(p, 0.0) * q:.2f}" for p, q in active_items
-    )
-
+    rows_html = "".join(f"<tr><td>{e(p)}</td><td>{q}</td><td>R{price_map.get(p, 0.0):.2f}</td><td>R{price_map.get(p, 0.0) * q:.2f}</td></tr>" for p, q in active_items)
+    rows_text = "\n".join(f"  {q}x {p} @ R{price_map.get(p, 0.0):.2f} = R{price_map.get(p, 0.0) * q:.2f}" for p, q in active_items)
     bank_qrs = []
     pay_list = payment_lines(inv_no, grand_total)
     pay_html = "<br>".join(html.escape(l) for l in pay_list)
+    
     if doc_type == "Official Invoice":
-        doc_html = f"""
-        <div class="quote-box">
-            <b>SEED 2 HARVEST (PTY) LTD — OFFICIAL TAX INVOICE</b><br>
-            123 Agricultural Way, Cape Town, 8001<br>
-            support@seed2harvest.co.za | +27 21 555 0192<hr>
-            <b>BILLED TO:</b> {e(st.session_state.user_data['name'])} ({e(st.session_state.user_data['farm'])})<br>
-            <b>DELIVERY ADDRESS:</b> {e(location_input)}<br>
-            <b>CONTACT:</b> {e(phone)} | {e(email_input)}<br>
-            <b>INVOICE NO:</b> {inv_no} &nbsp;|&nbsp; <b>DATE:</b> {date_str}
-            <table>
-                <tr><th>DESCRIPTION</th><th>QTY</th><th>UNIT PRICE</th><th>TOTAL</th></tr>
-                {rows_html}
-            </table>
-            <b>SUBTOTAL:</b> R {subtotal:.2f}<br>
-            <b>15% VAT:</b> R {tax_total:.2f}<br>
-            <b>TOTAL DUE:</b> R {grand_total:.2f}
-        </div>"""
+        doc_html = f"""<div class="quote-box"><b>SEED 2 HARVEST (PTY) LTD — OFFICIAL TAX INVOICE</b><br>123 Agricultural Way, Cape Town, 8001<br>support@seed2harvest.co.za | +27 21 555 0192<hr><b>BILLED TO:</b> {e(st.session_state.user_data['name'])} ({e(st.session_state.user_data['farm'])})<br><b>DELIVERY ADDRESS:</b> {e(location_input)}<br><b>CONTACT:</b> {e(phone)} | {e(email_input)}<br><b>INVOICE NO:</b> {inv_no} &nbsp;|&nbsp; <b>DATE:</b> {date_str}<table><tr><th>DESCRIPTION</th><th>QTY</th><th>UNIT PRICE</th><th>TOTAL</th></tr>{rows_html}</table><b>SUBTOTAL:</b> R {subtotal:.2f}<br><b>15% VAT:</b> R {tax_total:.2f}<br><b>TOTAL DUE:</b> R {grand_total:.2f}</div>"""
     else:
         bank_qrs = [(name, url, make_qr_png(url, box_size=6)) for name, url in BANKS]
-        doc_html = f"""
-        <div class="quote-box">
-            <b>SEED 2 HARVEST — QR CODE QUOTATION SUMMARY</b><br>
-            <b>REF:</b> {inv_no} | <b>TO:</b> {e(email_input)}
-            <table>
-                <tr><th>DESCRIPTION</th><th>QTY</th><th>UNIT PRICE</th><th>TOTAL</th></tr>
-                {rows_html}
-            </table>
-            <b>TOTAL (incl. 15% VAT):</b> R {grand_total:.2f}<br><br>
-            <b>PAYMENT DETAILS</b><br>{pay_html}<br>
-            Scan your bank's QR code below to open your bank, log in, then choose Pay / Pay beneficiary and enter the details above.
-        </div>"""
+        doc_html = f"""<div class="quote-box"><b>SEED 2 HARVEST — QR CODE QUOTATION SUMMARY</b><br><b>REF:</b> {inv_no} | <b>TO:</b> {e(email_input)}<table><tr><th>DESCRIPTION</th><th>QTY</th><th>UNIT PRICE</th><th>TOTAL</th></tr>{rows_html}</table><b>TOTAL (incl. 15% VAT):</b> R {grand_total:.2f}<br><br><b>PAYMENT DETAILS</b><br>{pay_html}<br>Scan your bank's QR code below to open your bank, log in, then choose Pay / Pay beneficiary and enter the details above.</div>"""
 
-    email_html = f"""
-    <html><body style="font-family:Arial,sans-serif;color:#222;">
-    <p>Dear {e(st.session_state.user_data['name'])},</p>
-    <p>Please find your requested <b>{e(doc_type.lower())}</b> for your order at {e(st.session_state.user_data['farm'])}.</p>
-    <p><b>Reference:</b> {inv_no}<br><b>Date:</b> {date_str}<br><b>Delivery address:</b> {e(location_input)}<br><b>Contact:</b> {e(phone)}</p>
-    <table style="border-collapse:collapse;width:100%;max-width:560px;" border="1" cellpadding="6">
-      <tr style="background:#f0e6d8;"><th align="left">Description</th><th>Qty</th><th>Unit</th><th>Total</th></tr>
-      {rows_html}
-    </table>
-    <p>Subtotal: R{subtotal:.2f}<br>VAT (15%): R{tax_total:.2f}<br><b>Total payable: R{grand_total:.2f}</b></p>
-    <p><b>Payment details</b><br>{pay_html}</p>
-    <p>Regards,<br>Seed 2 Harvest<br>support@seed2harvest.co.za</p>
-    </body></html>"""
+    email_html = f"<html><body style='font-family:Arial,sans-serif;color:#222;'><p>Dear {e(st.session_state.user_data['name'])},</p><p>Please find your requested <b>{e(doc_type.lower())}</b> for your order at {e(st.session_state.user_data['farm'])}.</p><p><b>Reference:</b> {inv_no}<br><b>Date:</b> {date_str}<br><b>Delivery address:</b> {e(location_input)}<br><b>Contact:</b> {e(phone)}</p><table style='border-collapse:collapse;width:100%;max-width:560px;' border='1' cellpadding='6'><tr style='background:#f0e6d8;'><th align='left'>Description</th><th>Qty</th><th>Unit</th><th>Total</th></tr>{rows_html}</table><p>Subtotal: R{subtotal:.2f}<br>VAT (15%): R{tax_total:.2f}<br><b>Total payable: R{grand_total:.2f}</b></p><p><b>Payment details</b><br>{pay_html}</p><p>Regards,<br>Seed 2 Harvest<br>support@seed2harvest.co.za</p></body></html>"
+    email_text = f"Dear {st.session_state.user_data['name']},\n\nYour {doc_type.lower()} for {st.session_state.user_data['farm']}.\nReference: {inv_no}\nDate: {date_str}\nDelivery: {location_input}\n\n{rows_text}\n\nSubtotal: R{subtotal:.2f}\nVAT (15%): R{tax_total:.2f}\nTotal payable: R{grand_total:.2f}\n\nPAYMENT DETAILS\n" + "\n".join(pay_list) + "\n\nSeed 2 Harvest"
+    mailto_url = f"mailto:{quote(email_input)}?cc={quote('support@seed2harvest.co.za')}&subject={quote('SEED2HARVEST ORDER INFORMATION')}&body={quote(email_text[:1500])}"
+    gmail_url = f"https://mail.google.com/mail/?view=cm&fs=1&to={quote(email_input)}&cc={quote('support@seed2harvest.co.za')}&su={quote('SEED2HARVEST ORDER INFORMATION')}&body={quote(email_text[:1200])}"
 
-    email_text = (
-        f"Dear {st.session_state.user_data['name']},\n\n"
-        f"Your {doc_type.lower()} for {st.session_state.user_data['farm']}.\n"
-        f"Reference: {inv_no}\nDate: {date_str}\nDelivery: {location_input}\n\n"
-        f"{rows_text}\n\nSubtotal: R{subtotal:.2f}\nVAT (15%): R{tax_total:.2f}\n"
-        f"Total payable: R{grand_total:.2f}\n\n"
-        + "PAYMENT DETAILS\n" + "\n".join(pay_list) + "\n\nSeed 2 Harvest"
-    )
-
-    mailto_url = (
-        f"mailto:{quote(email_input)}"
-        f"?cc={quote('support@seed2harvest.co.za')}"
-        f"&subject={quote('SEED2HARVEST ORDER INFORMATION')}"
-        f"&body={quote(email_text[:1500])}"
-    )
-
-    gmail_url = (
-        "https://mail.google.com/mail/?view=cm&fs=1"
-        f"&to={quote(email_input)}"
-        f"&cc={quote('support@seed2harvest.co.za')}"
-        f"&su={quote('SEED2HARVEST ORDER INFORMATION')}"
-        f"&body={quote(email_text[:1200])}"
-    )
-
-    st.session_state.last_document = {
-        "doc_html": doc_html, "bank_qrs": bank_qrs, "inv_no": inv_no, "email_html": email_html,
-        "to": email_input, "doc_type": doc_type, "mailto": mailto_url, "gmail": gmail_url, "email_text": email_text
-    }
+    st.session_state.last_document = {"doc_html": doc_html, "bank_qrs": bank_qrs, "inv_no": inv_no, "email_html": email_html, "to": email_input, "doc_type": doc_type, "mailto": mailto_url, "gmail": gmail_url, "email_text": email_text}
     return st.session_state.last_document
-
 
 def render_email_status(doc):
     st.success(f"{doc['doc_type']} ready. Choose how you want to send it.")
-    st.markdown(
-        f"<a class='mailto-btn' href='{doc['gmail']}' target='_blank' rel='noopener noreferrer'>OPEN IN GMAIL</a> &nbsp; "
-        f"<a class='mailto-btn' href='{doc['mailto']}' target='_blank' rel='noopener noreferrer'>OPEN IN OTHER EMAIL APP</a>",
-        unsafe_allow_html=True
-    )
-    st.caption(f"Opens a ready-written email to {doc['to']} with Seed 2 Harvest support copied in. Press send to finish.")
-    with st.expander("Or copy the email text yourself"):
-        st.caption("To: " + doc["to"] + "  |  Cc: support@seed2harvest.co.za  |  Subject: SEED2HARVEST ORDER INFORMATION")
-        st.code(doc["email_text"], language=None)
+    st.markdown(f"<a class='stButton' href='{doc['gmail']}' target='_blank'><button>OPEN IN GMAIL</button></a> &nbsp; <a class='stButton' href='{doc['mailto']}' target='_blank'><button>OPEN IN OTHER EMAIL APP</button></a>", unsafe_allow_html=True)
+    st.caption("Opens a ready-written email to your client. Press send to finish.")
 
 
-# SIDEBAR NAVIGATION & REAL-TIME BASKET
+# ================= SIDEBAR NAVIGATION =================
 with st.sidebar:
     st.markdown("<div class='sidebar-title'>ERTG</div>", unsafe_allow_html=True)
     st.markdown("<div class='sidebar-subtitle'>OPERATIONS</div>", unsafe_allow_html=True)
 
     if st.session_state.authenticated:
-        page_selection = st.radio(
-            "Navigate",
-            ["CHAT", "CATALOGUE", "RESERVE ORDER", "GLOBAL FEED", "FEATURES"],
-            label_visibility="collapsed"
-        )
+        page_selection = st.radio("Navigate", ["CHAT", "CATALOGUE", "RESERVE ORDER", "GLOBAL FEED", "FEATURES"], label_visibility="collapsed")
+        st.session_state.current_page = page_selection
     else:
         page_selection = "ONBOARDING"
         st.caption("Please authenticate to access operations.")
@@ -548,16 +393,15 @@ with st.sidebar:
 
     active_items = [(p, q) for p, q in st.session_state.basket.items() if q > 0]
     if not active_items:
-        st.write("Empty")
+        st.markdown("<span style='color:#94A3B8; font-size:0.9rem;'>Empty</span>", unsafe_allow_html=True)
     else:
         for prod, qty in active_items:
-            st.write(f"- {qty}x {prod}")
+            st.markdown(f"<span style='color:#F8FAFC; font-size:0.9rem;'>- {qty}x {prod}</span>", unsafe_allow_html=True)
         _, _, _total = basket_totals()
-        st.caption(f"Total incl. VAT: R{_total:.2f}")
+        st.markdown(f"<span style='color:#34D399; font-size:0.85rem; font-weight:700;'>Total: R{_total:.2f}</span>", unsafe_allow_html=True)
 
     if st.button("CLEAR BASKET"):
         clear_basket()
-        st.toast("Basket Cleared")
         st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
@@ -569,56 +413,26 @@ with st.sidebar:
         st.rerun()
 
 
-# DYNAMIC HIGH-RES SCENIC BACKGROUND INJECTION PER PAGE
-current_page_key = page_selection if st.session_state.authenticated else "ONBOARDING"
-selected_bg = page_bg_mapping.get(current_page_key, hq_images[0] if hq_images else "images/maxresdefault.jpg")
-resolved_bg_b64 = get_image_base64(selected_bg)
-
-if resolved_bg_b64:
-    st.markdown(f"""
-    <style>
-        .stApp {{
-            background: linear-gradient(rgba(10, 15, 25, 0.4), rgba(10, 15, 25, 0.65)), url('{resolved_bg_b64}') !important;
-            background-size: cover !important;
-            background-position: center !important;
-            background-attachment: fixed !important;
-        }}
-    </style>
-    """, unsafe_allow_html=True)
-
-
-# CINEMATIC EDITORIAL HERO HEADER
+# ================= MAIN APP HEADER =================
 st.markdown("""
-<div class="cinematic-hero">
-    <h1>Seed. Intelligence. Harvest.</h1>
-    <p>Precision Agricultural Operations Suite</p>
-</div>
+    <h1 class="main-title">Seed. Intelligence. Harvest.</h1>
+    <div class="sub-title">Precision Agricultural Operations Suite</div>
 """, unsafe_allow_html=True)
 
-# FEATURES CONTENT (shared)
 FEATURES = [
-    ("STRATEGIC AGENT", "Chat with an AI advisor grounded in our certified product catalogue. It knows your farm profile and what is in your basket, and understands Afrikaans farming slang."),
+    ("STRATEGIC AGENT", "Chat with an AI advisor grounded in our certified product catalogue. It knows your farm profile and what is in your basket."),
     ("LIVE CATALOGUE", "Browse products with current stock and pricing. Set quantities and your basket updates instantly in the sidebar."),
     ("SMART BASKET", "Your basket is shared across every page and the agent can see it, so you can ask for advice or a quote on exactly what you picked."),
     ("INVOICES & QUOTES", "Generate an official tax invoice (15% VAT) or a QR code quotation summary, and download it or have it emailed to you."),
-    ("EMAIL YOUR DOCUMENT", "One button opens your own email app with the invoice or quotation already written and addressed, subject SEED2HARVEST ORDER INFORMATION. Seed 2 Harvest support is copied in."),
-    ("FARM MAP", "The Global Feed page maps your delivery location so you can confirm where your order is going."),
-    ("PORTAL QR", "Scan the QR code to open the Seed 2 Harvest portal on your phone."),
-    ("POPIA COMPLIANT", "Your details are only used to run your session and process your orders, in line with POPIA."),
 ]
-
 
 def render_features():
     cols = st.columns(2)
     for i, (title, desc) in enumerate(FEATURES):
         with cols[i % 2]:
-            st.markdown(
-                f"<div class='feature-card'><h4>{title}</h4><p>{desc}</p></div>",
-                unsafe_allow_html=True
-            )
+            st.markdown(f"<div class='glass-card'><h4>{title}</h4><p>{desc}</p></div>", unsafe_allow_html=True)
 
-
-# VIEWS
+# ================= VIEWS =================
 
 if not st.session_state.authenticated:
     st.markdown("<div class='section-header'>CLIENT ONBOARDING</div>", unsafe_allow_html=True)
@@ -634,11 +448,7 @@ if not st.session_state.authenticated:
             client_location = st.text_input("LOCATION", key="onboard_loc")
             client_email = st.text_input("EMAIL ADDRESS", key="onboard_email")
 
-            st.markdown("""
-            <div class="custom-warning">
-                Hello fellow farmer. For the agent to work effectively we need permission to work with your data. Click yes to continue or leave.
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown("""<div class="custom-warning">Hello fellow farmer. For the agent to work effectively we need permission to work with your data. Click yes to continue or leave.</div>""", unsafe_allow_html=True)
 
             permission = st.checkbox("I GRANT PERMISSION")
             submitted = st.form_submit_button("AUTHORIZE ENTRY")
@@ -651,31 +461,27 @@ if not st.session_state.authenticated:
             elif "@" not in client_email or "." not in client_email.split("@")[-1]:
                 st.error("Please enter a valid email address.")
             else:
-                st.session_state.user_data = {
-                    "name": client_name, "farm": client_farm, "location": client_location, "email": client_email
-                }
+                st.session_state.user_data = {"name": client_name, "farm": client_farm, "location": client_location, "email": client_email}
                 st.session_state.authenticated = True
                 st.rerun()
 
 elif page_selection == "CHAT":
     st.markdown("<div class='section-header'>STRATEGIC AGENT</div>", unsafe_allow_html=True)
 
-    # JS Hook to programmatically open the hidden sidebar menu for easier navigation
+    # ACCESSIBILITY: JS Hook to programmatically open the hidden sidebar menu for easier navigation
     if st.button("⬅️ Open Menu Navigation"):
-        components.html(
-            """
+        components.html("""
             <script>
             const toggle = window.parent.document.querySelector('[data-testid="collapsedControl"]');
             if (toggle) { toggle.click(); }
             </script>
-            """, height=0, width=0
-        )
+        """, height=0, width=0)
 
-    # Chat Quick Guide UI
+    # QUICK GUIDE
     st.markdown("""
     <div class="chat-quick-guide">
-        <div style="font-weight: 800; font-size: 0.95rem; color: #34D399; margin-bottom: 12px; letter-spacing: 1px;">QUICK START GUIDE</div>
-        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <div style="font-family:'Playfair Display', serif; font-weight: 700; font-size: 1.1rem; color: #34D399; margin-bottom: 12px; letter-spacing: 1px;">QUICK START GUIDE</div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
             <div class="guide-item">🌱 <b>Product Expert</b>: Ask about crop treatments & dosages</div>
             <div class="guide-item">🛒 <b>Basket Aware</b>: I know what you've added to your cart</div>
             <div class="guide-item">🧾 <b>Instant Billing</b>: Ask me to prepare an invoice or quote</div>
@@ -701,8 +507,8 @@ elif page_selection == "CHAT":
     1. Ground your advice in the certified product catalog:
     {catalog_context}
     2. Never ask for their name or address again. Use their profile context automatically.
-    3. You can see the basket above. When the client says "from my basket" or "the basket", use those items and totals. Never ask them to re-list basket items.
-    4. You cannot send emails or generate files yourself. When the client wants an invoice or a QR code quotation, confirm the basket contents and total, then tell them a button will appear below the chat to prepare the document, and that they send it from their own email app to {st.session_state.user_data['email']}. Never claim an email has already been sent.
+    3. You can see the basket above. When the client says "from my basket" or "the basket", use those items and totals.
+    4. You cannot send emails or generate files yourself. When the client wants an invoice or a QR code quotation, confirm the basket contents and total, then tell them a button will appear below the chat to prepare the document.
     5. Keep responses professional, clear, and actionable. Do not use emojis.
     """
 
@@ -752,25 +558,16 @@ elif page_selection == "CHAT":
         st.markdown("<div class='section-header'>SEND DOCUMENT FROM BASKET</div>", unsafe_allow_html=True)
         _, _, _gt = basket_totals()
         st.caption(f"Basket total incl. VAT: R{_gt:.2f}. It will be addressed to {st.session_state.user_data['email']}.")
-        chat_doc_type = st.radio(
-            "Document type", ["Official Invoice", "QR Code Quotation Summary"],
-            horizontal=True, key="chat_doc_type"
-        )
+        chat_doc_type = st.radio("Document type", ["Official Invoice", "QR Code Quotation Summary"], horizontal=True, key="chat_doc_type")
         chat_phone = st.text_input("Contact number (optional)", key="chat_phone")
         if st.button(f"PREPARE {chat_doc_type.upper()}", key="chat_send_btn"):
             with st.spinner("Preparing document..."):
-                result = generate_and_send(
-                    chat_doc_type,
-                    st.session_state.user_data["location"],
-                    chat_phone or "Not provided",
-                    st.session_state.user_data["email"]
-                )
+                result = generate_and_send(chat_doc_type, st.session_state.user_data["location"], chat_phone or "Not provided", st.session_state.user_data["email"])
             render_email_status(result)
-            st.caption("The full document can also be downloaded on the RESERVE ORDER page.")
 
 elif page_selection == "CATALOGUE":
     st.markdown("<div class='section-header'>PRODUCT CATALOGUE</div>", unsafe_allow_html=True)
-    st.caption("Browse our professional agricultural formulations. Rendered instantly with clean, modern glassmorphism.")
+    st.caption("Browse our professional agricultural formulations. Optimized for instant load and clarity.")
 
     cols_grid = st.columns(3)
     for index, row in enumerate(catalog_data):
@@ -778,12 +575,12 @@ elif page_selection == "CATALOGUE":
         
         with cols_grid[index % 3]:
             st.markdown(f"""
-            <div class="product-glass-card">
-                <span style="background: rgba(52, 211, 153, 0.2); color: #34D399; padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;">{p_cat}</span>
-                <h3>{p_name}</h3>
-                <p style="color: #CBD5E1; font-size: 0.85rem; margin-bottom: 12px; line-height: 1.5;"><b>Guideline:</b> {p_guide}</p>
-                <div style="font-size: 1.35rem; font-weight: 800; color: #34D399; margin-bottom: 4px;">ZAR {p_price:.2f}</div>
-                <div style="font-size: 0.75rem; color: #94A3B8; margin-bottom: 15px; font-weight: 600;">Stock: {p_stock} available</div>
+            <div class="glass-card">
+                <span style="background: rgba(52, 211, 153, 0.2); color: #34D399; padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; border: 1px solid rgba(52, 211, 153, 0.3);">{p_cat}</span>
+                <h3 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #FFFFFF; margin: 12px 0 8px 0;">{p_name}</h3>
+                <p style="color: #CBD5E1; font-size: 0.85rem; margin-bottom: 15px; line-height: 1.5;"><b>Guideline:</b> {p_guide}</p>
+                <div style="font-size: 1.4rem; font-weight: 800; color: #34D399; margin-bottom: 4px;">ZAR {p_price:.2f}</div>
+                <div style="font-size: 0.75rem; color: #94A3B8; margin-bottom: 15px; font-weight: 600; letter-spacing: 0.5px;">{p_stock} UNITS IN STOCK</div>
             </div>
             """, unsafe_allow_html=True)
 
@@ -840,18 +637,12 @@ elif page_selection == "RESERVE ORDER":
                     st.image(bank_png, width=150)
                     st.markdown(f"**{bank_name}**  \n[Open site]({bank_url})")
             st.caption("Banks do not allow a public link that opens a pre-filled payment, so each code opens the bank. Log in, choose Pay, and use the reference and amount shown above.")
-        st.download_button(
-            "DOWNLOAD DOCUMENT (HTML)",
-            data=doc["email_html"].encode("utf-8"),
-            file_name=f"{doc['inv_no']}.html",
-            mime="text/html"
-        )
+        st.download_button("DOWNLOAD DOCUMENT (HTML)", data=doc["email_html"].encode("utf-8"), file_name=f"{doc['inv_no']}.html", mime="text/html")
 
 elif page_selection == "GLOBAL FEED":
     st.markdown("<div class='section-header'>GLOBAL FEED, MAP EXTENSION & PORTAL QR</div>", unsafe_allow_html=True)
 
     col_map, col_qr = st.columns(2)
-
     with col_map:
         st.markdown("### INTERACTIVE FARM MAP")
         user_loc = st.session_state.user_data['location']
@@ -863,8 +654,7 @@ elif page_selection == "GLOBAL FEED":
             st.caption(f"Matched: {resolved}")
         else:
             lat, lon = -33.9249, 18.4241
-            if user_loc:
-                st.warning("Could not find that location, showing Cape Town instead. Try a town or suburb name.")
+            if user_loc: st.warning("Could not find that location, showing Cape Town instead. Try a town or suburb name.")
 
         st.map(pd.DataFrame({"lat": [lat], "lon": [lon]}), zoom=10)
 
@@ -873,26 +663,9 @@ elif page_selection == "GLOBAL FEED":
         st.write("Scan to visit **Seed 2 Harvest** portal:")
         st.image(make_qr_png("https://seed2harvest.co.za"), width=180)
 
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("""
-    **ACTIVE SYSTEMS ARCHITECTURE:**
-    - **EA Middleware:** Python runtime translating regional vernacular & normalizing input streams.
-    - **Persistence:** SQLite relational mapping (`orders`, `inventory`, `clients`).
-    - **Compliance:** POPIA standards enforced on client data encapsulation.
-    - **Inference Engine:** Groq LPU hardware routing to openai/gpt-oss-120b.
-    """)
-
 elif page_selection == "FEATURES":
-    st.markdown("<div class='section-header'>WHAT THIS APP CAN DO</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-header'>PLATFORM FEATURES</div>", unsafe_allow_html=True)
     render_features()
-
-    st.markdown("### HOW TO PLACE AN ORDER")
-    st.markdown("""
-    1. Open **CATALOGUE** and set quantities. Your basket fills in the sidebar.
-    2. Ask the **CHAT** agent for advice on dosage or what suits your crop.
-    3. Open **RESERVE ORDER**, enter your contact number and pick Invoice or QR Quotation.
-    4. Process the order and dispatch documentation.
-    """)
 
 # FOOTER
 st.markdown("""
