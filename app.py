@@ -13,130 +13,164 @@ import The_Database as db
 
 # PAGE CONFIG & STYLING
 st.set_page_config(
-    page_title="Seed 2 Harvest | Strategic Agent",
+    page_title="Seed 2 Harvest | Modern Intelligence",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
-    # Global Modern Reset
+    # Global Atmospheric Minimalism Theme
     html, body, [class*="css"] {
-        font-family: 'Inter', sans-serif;
+        font-family: 'Plus Jakarta Sans', sans-serif;
     }
     
     .stApp { 
-        background-color: #0F172A; 
-        color: #F8FAFC; 
+        background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%); 
+        color: #1E293B; 
     }
 
     h1, h2, h3 { 
-        font-family: 'Inter', sans-serif; 
+        font-family: 'Plus Jakarta Sans', sans-serif; 
         font-weight: 700; 
-        color: #F8FAFC; 
+        color: #0F172A; 
     }
 
+    # Custom Header Styling
+    .hero-container {
+        background: #FFFFFF;
+        border: 1px solid #E2E8F0;
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
     .main-title { 
-        color: #F8FAFC; 
-        font-size: 2.25rem; 
+        color: #0F172A; 
+        font-size: 2.5rem; 
         line-height: 1.1; 
-        margin-bottom: 2px; 
-        margin-top: 5px;
-        font-weight: 700;
+        font-weight: 800;
+        letter-spacing: -0.025em;
+        margin: 0;
     }
     
     .sub-title { 
-        color: #10B981; 
+        color: #059669; 
         font-size: 0.85rem; 
-        letter-spacing: 2px; 
-        font-weight: 600; 
-        margin-bottom: 15px;
+        letter-spacing: 3px; 
+        font-weight: 700; 
         text-transform: uppercase;
+        margin-top: 6px;
     }
-    
+
     .section-header { 
-        color: #F8FAFC; 
+        color: #0F172A; 
         font-size: 1.25rem; 
-        margin-top: 20px; 
-        margin-bottom: 12px; 
-        font-weight: 600;
-        border-bottom: 2px solid #334155;
-        padding-bottom: 6px;
+        margin-top: 1.5rem; 
+        margin-bottom: 1rem; 
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
 
-    # Hero banner
+    # Banner image
     .hero-banner {
-        width: 100%; height: 110px; object-fit: cover; object-position: center;
-        border-radius: 12px; border: 1px solid #334155; display: block; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        width: 100%; height: 130px; object-fit: cover; object-position: center;
+        border-radius: 14px; border: 1px solid #E2E8F0; display: block; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        margin-bottom: 1.5rem;
     }
-    .hero-placeholder { height: 60px; background-color: #1E293B; border: 1px solid #334155; border-radius: 12px; }
+    .hero-placeholder { height: 80px; background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; margin-bottom: 1.5rem; }
 
-    # Inputs & Fields visibility fix
+    # Modern Input Fields
     .stTextInput > div > div > input, .stNumberInput > div > div > input, .stSelectbox > div > div > div {
-        background-color: #1E293B !important; 
-        color: #F8FAFC !important; 
-        border: 1px solid #475569 !important; 
-        border-radius: 8px;
+        background-color: #FFFFFF !important; 
+        color: #0F172A !important; 
+        border: 1px solid #CBD5E1 !important; 
+        border-radius: 12px !important;
+        padding: 0.6rem 1rem !important;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
     }
     .stTextInput > div > div > input:focus { 
-        border-color: #10B981 !important; 
-        box-shadow: 0 0 0 2px rgba(16,185,129,0.2); 
+        border-color: #059669 !important; 
+        box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1) !important; 
     }
 
     .custom-warning {
-        background-color: #064E3B; color: #A7F3D0; padding: 14px; border-radius: 10px; margin: 12px 0; font-size: 0.9rem; border: 1px solid #059669;
+        background-color: #ECFDF5; color: #065F46; padding: 16px; border-radius: 14px; margin: 15px 0; font-size: 0.92rem; border: 1px solid #A7F3D0;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.02);
     }
 
-    # Buttons
+    # Action Buttons
     .stButton > button, .stDownloadButton > button, [data-testid="stFormSubmitButton"] > button {
-        background-color: #10B981; color: #FFFFFF; border: none; border-radius: 8px; font-weight: 600; letter-spacing: 0.5px;
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-        transition: all 0.2s ease-in-out;
+        background: linear-gradient(135deg, #059669 0%, #047857 100%); 
+        color: #FFFFFF; 
+        border: none; 
+        border-radius: 12px; 
+        font-weight: 600; 
+        padding: 0.6rem 1.25rem;
+        letter-spacing: 0.3px;
+        box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .stButton > button:hover, .stDownloadButton > button:hover, [data-testid="stFormSubmitButton"] > button:hover { 
-        background-color: #059669; color: #FFFFFF; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(5, 150, 105, 0.3);
+        background: linear-gradient(135deg, #047857 0%, #065F46 100%);
     }
 
-    # Sidebar Styling
+    # Sidebar Modernization
     [data-testid="stSidebar"] { 
-        background-color: #1E293B; 
-        border-right: 1px solid #334155; 
+        background-color: #FFFFFF; 
+        border-right: 1px solid #E2E8F0; 
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.02);
     }
-    .sidebar-title { color: #F8FAFC; font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
-    .sidebar-subtitle { color: #94A3B8; font-size: 0.7rem; letter-spacing: 1px; margin-bottom: 12px; font-weight: 600; }
+    .sidebar-title { color: #0F172A; font-size: 1.1rem; font-weight: 800; margin-bottom: 2px; letter-spacing: -0.01em; }
+    .sidebar-subtitle { color: #64748B; font-size: 0.72rem; letter-spacing: 1.5px; margin-bottom: 15px; font-weight: 700; text-transform: uppercase; }
 
-    # Quote & Document Cards
+    # Glass & Clean Cards
     .quote-box {
-        background-color: #1E293B; border: 1px solid #334155; padding: 24px; border-radius: 12px; font-family: 'Inter', sans-serif; color: #F8FAFC; margin-top: 15px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        background-color: #FFFFFF; border: 1px solid #E2E8F0; padding: 28px; border-radius: 16px; font-family: 'Plus Jakarta Sans', sans-serif; color: #0F172A; margin-top: 20px;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
     }
     .quote-box table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-    .quote-box th { text-align: left; color: #34D399; border-bottom: 2px solid #334155; padding: 8px; font-size: 0.85rem; }
-    .quote-box td { padding: 8px; border-bottom: 1px solid #334155; font-size: 0.9rem; color: #CBD5E1; }
+    .quote-box th { text-align: left; color: #059669; border-bottom: 2px solid #E2E8F0; padding: 10px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; }
+    .quote-box td { padding: 10px; border-bottom: 1px solid #F1F5F9; font-size: 0.92rem; color: #334155; }
 
-    [data-testid="stForm"] { border: none !important; padding: 0 !important; }
+    [data-testid="stForm"] { border: none !important; padding: 0 !important; background: transparent !important; }
     
     a.mailto-btn {
-        display: inline-block; background-color: #10B981; color: #FFFFFF !important; text-decoration: none !important;
-        padding: 10px 18px; border-radius: 8px; font-weight: 600; letter-spacing: 0.5px; font-size: 0.85rem; margin: 6px 0 12px 0;
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        display: inline-block; background: linear-gradient(135deg, #059669 0%, #047857 100%); color: #FFFFFF !important; text-decoration: none !important;
+        padding: 12px 22px; border-radius: 12px; font-weight: 700; letter-spacing: 0.3px; font-size: 0.88rem; margin: 8px 0 15px 0;
+        box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+        transition: all 0.2s ease;
     }
-    a.mailto-btn:hover { background-color: #059669; }
+    a.mailto-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(5, 150, 105, 0.35); }
 
-    # Feature Cards
+    # Feature Grid Cards
     .feature-card {
-        background-color: #1E293B; border: 1px solid #334155; border-left: 4px solid #10B981;
-        padding: 18px; border-radius: 10px; margin-bottom: 14px; min-height: 130px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        background-color: #FFFFFF; border: 1px solid #E2E8F0; border-top: 4px solid #059669;
+        padding: 22px; border-radius: 16px; margin-bottom: 16px; height: 100%;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-    .feature-card h4 { color: #F8FAFC; margin: 0 0 6px 0; font-size: 1rem; font-weight: 600; }
-    .feature-card p { color: #94A3B8; margin: 0; font-size: 0.88rem; line-height: 1.5; }
+    .feature-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.06);
+    }
+    .feature-card h4 { color: #0F172A; margin: 0 0 8px 0; font-size: 1.05rem; font-weight: 700; }
+    .feature-card p { color: #64748B; margin: 0; font-size: 0.9rem; line-height: 1.5; }
 
-    .footer { text-align: center; margin-top: 40px; padding-top: 15px; border-top: 1px solid #334155; }
-    .footer h4 { color: #F8FAFC; margin: 0; font-size: 0.9rem; letter-spacing: 1px; font-weight: 600;}
-    .footer p { color: #94A3B8; font-size: 0.7rem; letter-spacing: 1px; margin-top: 4px;}
+    .footer { text-align: center; margin-top: 50px; padding: 20px 0; border-top: 1px solid #E2E8F0; background: #FFFFFF; border-radius: 16px 16px 0 0; }
+    .footer h4 { color: #0F172A; margin: 0; font-size: 0.95rem; letter-spacing: 1px; font-weight: 700;}
+    .footer p { color: #64748B; font-size: 0.75rem; letter-spacing: 1px; margin-top: 6px; font-weight: 600;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -441,10 +475,16 @@ with st.sidebar:
         st.session_state.last_document = None
         st.rerun()
 
-# COMPACT MAIN HEADER
+# MODERN APP HEADER SECTION
 st.markdown(load_banner_html(), unsafe_allow_html=True)
-st.markdown("<div class='main-title'>SEED 2 HARVEST</div>", unsafe_allow_html=True)
-st.markdown("<div class='sub-title'>ELEVATE YOUR EVERYDAY</div>", unsafe_allow_html=True)
+st.markdown("""
+<div class="hero-container">
+    <div>
+        <div class="main-title">SEED 2 HARVEST</div>
+        <div class="sub-title">Agricultural Intelligence & Operations Suite</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 # FEATURES CONTENT (shared)
 FEATURES = [
