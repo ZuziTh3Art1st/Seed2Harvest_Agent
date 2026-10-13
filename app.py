@@ -19,17 +19,28 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# HELPER TO GET ALL IMAGES FROM IMAGES FOLDER
+# HELPER TO GET ONLY PREMIUM HIGH QUALITY IMAGES FROM IMAGES FOLDER
 def get_high_quality_images():
     high_quality_list_buz = []
+    
+    # Strictly allowed premium scenic images to prevent low-quality renders
+    premium_allowed_buz = [
+        "pexels-dirrez-3672776.jpg",
+        "pexels-joran-quinten-2125825-3775331.jpg",
+        "pexels-tatianasyrikova-3934023.jpg",
+        "pexels-richard-pan-5305182-12643137.jpg",
+        "pexels-arndt-peter-bergfeld-151632051-39888320.jpg",
+        "v2osk-1Z2niiBPg5A-unsplash.jpg",
+        "pietro-de-grandi-T7K4aEPoGGk-unsplash.jpg",
+        "mark-harpur-K2s_YE031CA-unsplash.jpg"
+    ]
+    
     try:
         if os.path.exists("images"):
             all_files = os.listdir("images")
             for f in all_files:
-                if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp', '.avif')):
-                    # Exclude low-res test thumbs
-                    if "67cad4" not in f and "X9" not in f:
-                        high_quality_list_buz.append(os.path.join("images", f))
+                if f in premium_allowed_buz:
+                    high_quality_list_buz.append(os.path.join("images", f))
     except Exception:
         pass
     
@@ -39,7 +50,9 @@ def get_high_quality_images():
             "https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2032&auto=format&fit=crop",
             "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=2040&auto=format&fit=crop",
             "https://images.unsplash.com/photo-1511497584788-876761142212?q=80&w=2032&auto=format&fit=crop",
-            "https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=2070&auto=format&fit=crop"
+            "https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=2070&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1464226184884-fa280b87c399?q=80&w=2070&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2032&auto=format&fit=crop"
         ]
     return high_quality_list_buz
 
@@ -67,7 +80,7 @@ if "last_document" not in st.session_state: st.session_state.last_document = Non
 current_page = "ONBOARDING" if not st.session_state.authenticated else st.session_state.get("current_page", "CHAT")
 
 page_bg_mapping_buz = {
-    "ONBOARDING": hq_images_buz[0] if len(hq_images_buz) > 0 else "images/maxresdefault.jpg",
+    "ONBOARDING": hq_images_buz[0] if len(hq_images_buz) > 0 else hq_images_buz[-1],
     "CHAT": hq_images_buz[1] if len(hq_images_buz) > 1 else hq_images_buz[0],
     "CATALOGUE": hq_images_buz[2] if len(hq_images_buz) > 2 else hq_images_buz[0],
     "RESERVE ORDER": hq_images_buz[3] if len(hq_images_buz) > 3 else hq_images_buz[0],
@@ -75,26 +88,26 @@ page_bg_mapping_buz = {
     "FEATURES": hq_images_buz[5] if len(hq_images_buz) > 5 else hq_images_buz[0]
 }
 
-bg_path = page_bg_mapping_buz.get(current_page, hq_images_buz[0])
-bg_b64 = get_image_base64(bg_path)
+bg_path_buz = page_bg_mapping_buz.get(current_page, hq_images_buz[0])
+bg_b64_buz = get_image_base64(bg_path_buz)
 
-# ================= GLOBAL AGGRESSIVE CSS OVERRIDE =================
+# GLOBAL AGGRESSIVE CSS OVERRIDE
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
-    /* 1. Force Dark Mode & Background Image globally */
+    /* Force Dark Mode & Background Image globally */
     .stApp {{
-        background: linear-gradient(180deg, rgba(6, 9, 15, 0.4) 0%, rgba(6, 9, 15, 0.85) 100%), url('{bg_b64}') !important;
+        background: linear-gradient(180deg, rgba(6, 9, 15, 0.4) 0%, rgba(6, 9, 15, 0.85) 100%), url('{bg_b64_buz}') !important;
         background-size: cover !important;
         background-position: center center !important;
         background-attachment: fixed !important;
     }}
     
-    /* 2. Hide top header band */
+    /* Hide top header band */
     header[data-testid="stHeader"] {{ background: transparent !important; }}
 
-    /* 3. Force all text to white/off-white to combat Light Mode */
+    /* Force all text to white/off-white to combat Light Mode */
     html, body, p, span, div, label, h1, h2, h3, h4, h5, h6, li {{
         font-family: 'Plus Jakarta Sans', sans-serif;
         color: #F8FAFC !important;
@@ -105,7 +118,7 @@ st.markdown(f"""
         font-weight: 700 !important; 
     }}
 
-    /* 4. Cinematic Typography Blocks */
+    /* Cinematic Typography Blocks */
     .main-title {{
         font-family: 'Playfair Display', serif !important;
         font-size: 4rem;
@@ -132,7 +145,7 @@ st.markdown(f"""
         margin: 2rem 0 1.5rem 0;
     }}
 
-    /* 5. True Transparent Frosted Sidebar */
+    /* True Transparent Frosted Sidebar */
     [data-testid="stSidebar"] {{ 
         background-color: rgba(10, 15, 25, 0.35) !important; 
         border-right: 1px solid rgba(255, 255, 255, 0.1) !important; 
@@ -141,20 +154,20 @@ st.markdown(f"""
     }}
     [data-testid="stSidebar"] > div:first-child {{ background-color: transparent !important; }}
     
-    /* 6. Form Inputs & Regular Fields */
-    .stTextInput input, .stNumberInput input, .stSelectbox div[data-baseweb="select"] {{
+    /* Form Inputs & Chat Box */
+    .stTextInput input, .stNumberInput input, .stSelectbox div[data-baseweb="select"], [data-testid="stChatInput"] {{
         background-color: rgba(15, 23, 42, 0.65) !important; 
         color: #FFFFFF !important; 
         border: 1px solid rgba(255, 255, 255, 0.2) !important; 
         border-radius: 12px !important;
         backdrop-filter: blur(10px) !important;
     }}
-    .stTextInput input:focus {{ 
+    .stTextInput input:focus, [data-testid="stChatInput"]:focus-within {{ 
         border-color: #34D399 !important; 
         box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.3) !important; 
     }}
 
-    /* 7. Action Buttons */
+    /* Action Buttons */
     .stButton button, .stDownloadButton button, [data-testid="stFormSubmitButton"] button {{
         background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important; 
         color: #FFFFFF !important; 
@@ -171,7 +184,7 @@ st.markdown(f"""
         background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
     }}
 
-    /* 8. Immersive Chat Messages */
+    /* Immersive Chat Messages */
     [data-testid="stChatMessage"] {{
         background-color: rgba(15, 23, 42, 0.6) !important;
         backdrop-filter: blur(16px) !important;
@@ -183,7 +196,7 @@ st.markdown(f"""
         box-shadow: 0 10px 25px rgba(0,0,0,0.2) !important;
     }}
 
-    /* 9. Bottom Chat Container Glass Effect Overrides White Bar */
+    /* Bottom Chat Container Glass Effect Overrides White Bar */
     [data-testid="stBottom"] > div {{
         background-color: rgba(10, 15, 25, 0.3) !important;
         backdrop-filter: blur(25px) !important;
@@ -257,7 +270,7 @@ st.markdown(f"""
 
 db.init_db()
 
-# ================= HELPERS & LOGIC =================
+# HELPERS & LOGIC
 BANKS = [
     ("FNB", "https://www.fnb.co.za"),
     ("Standard Bank", "https://www.standardbank.co.za"),
@@ -300,18 +313,6 @@ class AgriculturalMiddleware:
         for pattern, replacement in cls.SLANG_DICTIONARY.items():
             normalized = re.sub(pattern, replacement, normalized, flags=re.IGNORECASE)
         return normalized
-
-@st.cache_data(show_spinner=False, ttl=86400)
-def geocode_location(query: str):
-    if not query or not query.strip(): return None
-    headers = {"User-Agent": "seed2harvest-streamlit-app/1.0"}
-    for q in (query, f"{query}, South Africa"):
-        try:
-            r = requests.get("https://nominatim.openstreetmap.org/search", params={"q": q, "format": "json", "limit": 1}, headers=headers, timeout=8)
-            data = r.json()
-            if data: return float(data[0]["lat"]), float(data[0]["lon"]), data[0].get("display_name", q)
-        except Exception: continue
-    return None
 
 def make_qr_png(data: str, box_size=5) -> bytes:
     qr = qrcode.QRCode(version=None, box_size=box_size, border=2)
@@ -391,7 +392,7 @@ def render_email_status(doc):
     st.caption("Opens a ready-written email to your client. Press send to finish.")
 
 
-# ================= SIDEBAR NAVIGATION =================
+# SIDEBAR NAVIGATION
 with st.sidebar:
     st.markdown("<div class='sidebar-title'>ERTG</div>", unsafe_allow_html=True)
     st.markdown("<div class='sidebar-subtitle'>OPERATIONS</div>", unsafe_allow_html=True)
@@ -428,7 +429,7 @@ with st.sidebar:
         st.rerun()
 
 
-# ================= MAIN APP HEADER =================
+# MAIN APP HEADER
 st.markdown("""
 <div class="cinematic-hero">
     <h1>Seed. Intelligence. Harvest.</h1>
@@ -449,7 +450,7 @@ def render_features():
         with cols[i % 2]:
             st.markdown(f"<div class='glass-card'><h4>{title}</h4><p>{desc}</p></div>", unsafe_allow_html=True)
 
-# ================= VIEWS =================
+# VIEWS
 
 if not st.session_state.authenticated:
     st.markdown("<div class='section-header'>CLIENT ONBOARDING</div>", unsafe_allow_html=True)
@@ -494,7 +495,7 @@ elif page_selection == "CHAT":
             </script>
         """, height=0, width=0)
 
-    # QUICK GUIDE
+    # QUICK GUIDE (Emojis removed as requested)
     st.markdown("""
     <div class="chat-quick-guide">
         <div style="font-family:'Playfair Display', serif; font-weight: 700; font-size: 1.1rem; color: #34D399; margin-bottom: 12px; letter-spacing: 1px;">QUICK START GUIDE</div>
@@ -662,18 +663,27 @@ elif page_selection == "GLOBAL FEED":
     col_map, col_qr = st.columns(2)
     with col_map:
         st.markdown("### INTERACTIVE FARM MAP")
-        user_loc = st.session_state.user_data['location']
-        st.write(f"Delivery Location: **{user_loc or 'Cape Town, South Africa'}**")
+        user_loc_buz = st.session_state.user_data['location']
+        if not user_loc_buz:
+            user_loc_buz = "Cape Town, South Africa"
+            
+        st.write(f"Delivery Location: **{user_loc_buz}**")
 
-        result = geocode_location(user_loc)
-        if result:
-            lat, lon, resolved = result
-            st.caption(f"Matched: {resolved}")
-        else:
-            lat, lon = -33.9249, 18.4241
-            if user_loc: st.warning("Could not find that location, showing Cape Town instead. Try a town or suburb name.")
-
-        st.map(pd.DataFrame({"lat": [lat], "lon": [lon]}), zoom=10)
+        # Full Google Maps integration 
+        encoded_loc_buz = quote(user_loc_buz)
+        gmaps_iframe_buz = f"""
+        <iframe 
+            width="100%" 
+            height="400" 
+            frameborder="0" 
+            scrolling="no" 
+            marginheight="0" 
+            marginwidth="0" 
+            src="https://maps.google.com/maps?q={encoded_loc_buz}&hl=en&z=14&amp;output=embed"
+            style="border-radius: 16px; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+        </iframe>
+        """
+        st.markdown(gmaps_iframe_buz, unsafe_allow_html=True)
 
     with col_qr:
         st.markdown("### OFFICIAL WEBSITE QR CODE")
@@ -689,6 +699,6 @@ st.markdown("""
 <div class='footer'>
     <h4>BUZUZI INCORPORATED</h4>
     <p>FOLLOW ON SOCIALS: @SEED2HARVEST_GLOBAL</p>
-    <p style="margin-top: 12px; font-size: 0.8rem; color: #34D399;">Created by Ashley Tinotenda Buzuzi, Software Engineer (CEO)</p>
+    <p style="margin-top: 12px; font-size: 0.85rem; color: #34D399; text-transform: none; letter-spacing: 0px;">Created by Ashley Tinotenda Buzuzi, Software Engineer (CEO)</p>
 </div>
 """, unsafe_allow_html=True)
