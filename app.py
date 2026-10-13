@@ -5,6 +5,7 @@ import base64
 from urllib.parse import quote
 import requests
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import qrcode
 from io import BytesIO
@@ -12,7 +13,6 @@ from groq import Groq
 import The_Database as db
 
 # PAGE CONFIG & STYLING
-# Setting initial_sidebar_state to "collapsed" ensures the sidebar stays out of the way when navigating
 st.set_page_config(
     page_title="Seed 2 Harvest | Cinematic Intelligence",
     layout="wide",
@@ -102,7 +102,7 @@ st.markdown("""
 
     # Chat Quick Guide UI
     .chat-quick-guide {
-        background: rgba(15, 23, 42, 0.45);
+        background: rgba(15, 23, 42, 0.55);
         backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.15);
         border-radius: 16px;
@@ -112,10 +112,10 @@ st.markdown("""
     .guide-item {
         font-size: 0.85rem;
         color: #E2E8F0;
-        background: rgba(255, 255, 255, 0.05);
+        background: rgba(255, 255, 255, 0.08);
         padding: 8px 14px;
         border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         display: inline-block;
         margin-right: 8px;
         margin-bottom: 8px;
@@ -139,15 +139,21 @@ st.markdown("""
         background: linear-gradient(135deg, #059669 0%, #047857 100%);
     }
 
-    # True Transparent Glass Sidebar
-    [data-testid="stSidebar"] { 
-        background-color: rgba(10, 15, 25, 0.25) !important; 
-        border-right: 1px solid rgba(255, 255, 255, 0.1) !important; 
-        backdrop-filter: blur(18px) !important;
-        -webkit-backdrop-filter: blur(18px) !important;
+    # True Transparent Glass Sidebar (Overriding Light Mode defaults)
+    section[data-testid="stSidebar"] { 
+        background-color: rgba(10, 15, 25, 0.8) !important; 
+        border-right: 1px solid rgba(255, 255, 255, 0.15) !important; 
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
     }
-    [data-testid="stSidebar"] > div:first-child {
+    section[data-testid="stSidebar"] > div {
         background-color: transparent !important;
+    }
+    # Force sidebar text to be light even in light mode
+    section[data-testid="stSidebar"] .stMarkdown p,
+    section[data-testid="stSidebar"] .stMarkdown div,
+    section[data-testid="stSidebar"] .stRadio label {
+        color: #F8FAFC !important;
     }
     .sidebar-title { color: #FFFFFF; font-size: 1.15rem; font-weight: 800; margin-bottom: 2px; }
     .sidebar-subtitle { color: #94A3B8; font-size: 0.72rem; letter-spacing: 2px; margin-bottom: 15px; font-weight: 700; text-transform: uppercase; }
@@ -173,7 +179,7 @@ st.markdown("""
 
     # Apple-grade Feature Cards
     .feature-card {
-        background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.15); border-top: 3px solid #34D399;
+        background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.15); border-top: 3px solid #34D399;
         padding: 26px; border-radius: 24px; margin-bottom: 18px; height: 100%;
         box-shadow: 0 15px 35px -10px rgba(0,0,0,0.4);
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease;
@@ -215,7 +221,7 @@ st.markdown("""
         margin-top: 80px; 
         padding: 30px 0; 
         border-top: 1px solid rgba(255, 255, 255, 0.15); 
-        background: rgba(4, 6, 11, 0.4); 
+        background: rgba(4, 6, 11, 0.5); 
         backdrop-filter: blur(12px); 
     }
     .footer h4 { font-family: 'Playfair Display', serif; color: #FFFFFF; margin: 0; font-size: 1.1rem; letter-spacing: 1px; font-weight: 700;}
@@ -312,7 +318,7 @@ def make_qr_png(data: str, box_size=5) -> bytes:
     return buf.getvalue()
 
 
-# HIGH QUALITY CURATED IMAGE SELECTOR (FILTERING OUT LOW QUALITY ASSETS)
+# HIGH QUALITY CURATED IMAGE SELECTOR
 def get_high_quality_images():
     high_quality_list = []
     try:
@@ -320,13 +326,11 @@ def get_high_quality_images():
             all_files = os.listdir("images")
             for f in all_files:
                 if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp', '.avif')):
-                    # Exclude known lower-quality or unrefined test thumbs
                     if "67cad4" not in f and "X9" not in f:
                         high_quality_list.append(os.path.join("images", f))
     except Exception:
         pass
     
-    # Fallback to Unsplash premium high-res photography if local folder lacks pristine assets
     if not high_quality_list:
         high_quality_list = [
             "https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2032&auto=format&fit=crop",
@@ -574,7 +578,7 @@ if resolved_bg_b64:
     st.markdown(f"""
     <style>
         .stApp {{
-            background: linear-gradient(rgba(10, 15, 25, 0.5), rgba(10, 15, 25, 0.8)), url('{resolved_bg_b64}') !important;
+            background: linear-gradient(rgba(10, 15, 25, 0.4), rgba(10, 15, 25, 0.65)), url('{resolved_bg_b64}') !important;
             background-size: cover !important;
             background-position: center !important;
             background-attachment: fixed !important;
@@ -655,6 +659,17 @@ if not st.session_state.authenticated:
 
 elif page_selection == "CHAT":
     st.markdown("<div class='section-header'>STRATEGIC AGENT</div>", unsafe_allow_html=True)
+
+    # JS Hook to programmatically open the hidden sidebar menu for easier navigation
+    if st.button("⬅️ Open Menu Navigation"):
+        components.html(
+            """
+            <script>
+            const toggle = window.parent.document.querySelector('[data-testid="collapsedControl"]');
+            if (toggle) { toggle.click(); }
+            </script>
+            """, height=0, width=0
+        )
 
     # Chat Quick Guide UI
     st.markdown("""
