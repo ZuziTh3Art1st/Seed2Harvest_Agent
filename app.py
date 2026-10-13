@@ -69,6 +69,12 @@ def get_image_base64(path):
     except Exception:
         return ""
 
+def aes_256_decrypt_mock(ciphertext: str) -> str:
+    if not ciphertext or not ciphertext.startswith("AES256::ENCRYPTED::"):
+        return ciphertext
+    clean_cipher = ciphertext.replace("AES256::ENCRYPTED::", "")
+    return base64.b64decode(clean_cipher).decode('utf-8')
+
 # INITIALIZE STATE & ROUTING
 if "authenticated" not in st.session_state: st.session_state.authenticated = False
 if "user_data" not in st.session_state: st.session_state.user_data = {"name": "", "farm": "", "location": "", "email": ""}
@@ -92,7 +98,7 @@ if "bg_mapping_buz" not in st.session_state:
 bg_path_buz = st.session_state.bg_mapping_buz.get(current_page_buz, "images/maxresdefault.jpg")
 bg_b64_buz = get_image_base64(bg_path_buz)
 
-# DYNAMIC SIDEBAR VISIBILITY: Hide Sidebar Completely on Onboarding
+# DYNAMIC SIDEBAR VISIBILITY
 sidebar_css_buz = ""
 if not st.session_state.authenticated:
     sidebar_css_buz = """
@@ -261,15 +267,15 @@ def get_platform_stats():
         conn_buz = sqlite3.connect("the_farm_agent.db")
         c_buz = conn_buz.cursor()
         
-        c_buz.execute("SELECT COUNT(DISTINCT farmer_id) FROM popia_encrypted_clients")
+        c_buz.execute("SELECT COUNT(DISTINCT farmer_uuid) FROM clients_vault")
         total_users_buz = c_buz.fetchone()[0] or 0
         
-        c_buz.execute("SELECT AVG(user_total) FROM (SELECT SUM(quantity) as user_total FROM orders_commitment GROUP BY farmer_id)")
+        c_buz.execute("SELECT AVG(user_total) FROM (SELECT SUM(quantity) as user_total FROM orders_ledger GROUP BY farmer_ref)")
         avg_items_buz = c_buz.fetchone()[0] or 0
         
-        c_buz.execute("SELECT delivery_location FROM popia_encrypted_clients GROUP BY delivery_location ORDER BY COUNT(*) DESC LIMIT 1")
+        c_buz.execute("SELECT delivery_address FROM clients_vault GROUP BY delivery_address ORDER BY COUNT(*) DESC LIMIT 1")
         top_loc_row_buz = c_buz.fetchone()
-        top_loc_buz = top_loc_row_buz[0] if top_loc_row_buz else "N/A"
+        top_loc_buz = aes_256_decrypt_mock(top_loc_row_buz[0]) if top_loc_row_buz else "N/A"
         
         conn_buz.close()
         return total_users_buz, round(avg_items_buz, 1), top_loc_buz
@@ -277,24 +283,27 @@ def get_platform_stats():
         return 0, 0.0, "N/A"
 
 def login_with_receipt(receipt_str):
-    try: order_id_buz = int(''.join(filter(str.isdigit, receipt_str)))
-    except ValueError: return None
-        
     try:
         conn_buz = sqlite3.connect("the_farm_agent.db")
         c_buz = conn_buz.cursor()
+        search_str = receipt_str.replace("C", "").lower() + "%"
+        
         c_buz.execute("""
-            SELECT p.full_name, p.phone_contact, p.delivery_location
-            FROM orders_commitment o
-            JOIN popia_encrypted_clients p ON o.farmer_id = p.farmer_id
-            WHERE o.order_id = ?
-        """, (order_id_buz,))
+            SELECT c.first_name, c.last_name, c.delivery_address
+            FROM orders_ledger o
+            JOIN clients_vault c ON o.farmer_ref = c.farmer_uuid
+            WHERE o.order_id LIKE ?
+        """, (search_str,))
         row_buz = c_buz.fetchone()
         conn_buz.close()
         
         if row_buz:
-            email_guess_buz = f"{row_buz[0].replace(' ', '').lower()}@farm.co.za"
-            return {"name": row_buz[0], "farm": "Registered Farm", "location": row_buz[2], "email": email_guess_buz}
+            fname = aes_256_decrypt_mock(row_buz[0])
+            lname = aes_256_decrypt_mock(row_buz[1])
+            full_name = f"{fname} {lname}"
+            loc = aes_256_decrypt_mock(row_buz[2])
+            email_guess_buz = f"{fname.lower()}{lname.lower()}@farm.co.za"
+            return {"name": full_name, "farm": "Registered Farm", "location": loc, "email": email_guess_buz}
     except Exception:
         pass
     return None
