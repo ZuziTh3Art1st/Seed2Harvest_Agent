@@ -40,12 +40,12 @@ st.markdown("""
         color: #FFFFFF; 
     }
 
-    # Cinematic Hero Section with Dynamic Scenic Background Overlay
+    # Cinematic Hero Section with High-Resolution Photography
     .cinematic-hero {
         position: relative;
         border-radius: 28px;
         overflow: hidden;
-        background: rgba(15, 23, 42, 0.45);
+        background: rgba(15, 23, 42, 0.4);
         backdrop-filter: blur(14px);
         padding: 4rem 3rem;
         margin-bottom: 2.5rem;
@@ -119,11 +119,11 @@ st.markdown("""
         background: linear-gradient(135deg, #059669 0%, #047857 100%);
     }
 
-    # Seamless Gradient Sidebar Replacing Solid Grey/Black Box
+    # Highly Opaque Immersive Gradient Sidebar
     [data-testid="stSidebar"] { 
-        background: linear-gradient(180deg, rgba(6, 9, 15, 0.95) 0%, rgba(15, 23, 42, 0.9) 100%); 
+        background: linear-gradient(180deg, rgba(6, 9, 15, 0.6) 0%, rgba(15, 23, 42, 0.5) 100%) !important; 
         border-right: 1px solid rgba(255, 255, 255, 0.15); 
-        backdrop-filter: blur(20px);
+        backdrop-filter: blur(25px);
     }
     .sidebar-title { color: #FFFFFF; font-size: 1.15rem; font-weight: 800; margin-bottom: 2px; }
     .sidebar-subtitle { color: #94A3B8; font-size: 0.72rem; letter-spacing: 2px; margin-bottom: 15px; font-weight: 700; text-transform: uppercase; }
@@ -162,8 +162,8 @@ st.markdown("""
     .feature-card h4 { font-family: 'Playfair Display', serif; color: #FFFFFF; margin: 0 0 10px 0; font-size: 1.25rem; font-weight: 700; }
     .feature-card p { color: #CBD5E1; margin: 0; font-size: 0.92rem; line-height: 1.6; }
 
-    # 3D Depth Catalogue Showcase Cards
-    .product-3d-card {
+    # Clean Catalogue Showcase Cards (No Slow 3D Transitions)
+    .product-showcase-card {
         background: rgba(30, 41, 59, 0.75);
         backdrop-filter: blur(16px);
         border: 1px solid rgba(255, 255, 255, 0.15);
@@ -171,22 +171,8 @@ st.markdown("""
         padding: 2rem 1.5rem;
         text-align: center;
         box-shadow: 0 20px 40px -15px rgba(0,0,0,0.6);
-        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
         position: relative;
         overflow: hidden;
-    }
-
-    .product-3d-card::before {
-        content: '';
-        position: absolute;
-        top: 0; left: 0; right: 0; height: 2px;
-        background: linear-gradient(90deg, transparent, rgba(52, 211, 153, 0.7), transparent);
-    }
-
-    .product-3d-card:hover {
-        transform: translateY(-8px) scale(1.02);
-        box-shadow: 0 30px 60px -15px rgba(16, 185, 129, 0.35);
-        border-color: rgba(52, 211, 153, 0.6);
     }
 
     .product-image-container {
@@ -200,15 +186,14 @@ st.markdown("""
         border: 1px solid rgba(255, 255, 255, 0.15);
     }
 
-    # Seamless Footer without Black Box Rectangle
+    # Seamless Immersive Footer
     .footer { 
         text-align: center; 
         margin-top: 80px; 
         padding: 30px 0; 
         border-top: 1px solid rgba(255, 255, 255, 0.15); 
-        background: rgba(4, 6, 11, 0.45); 
-        backdrop-filter: blur(10px);
-        border-radius: 0px; 
+        background: rgba(4, 6, 11, 0.3); 
+        backdrop-filter: blur(10px); 
     }
     .footer h4 { font-family: 'Playfair Display', serif; color: #FFFFFF; margin: 0; font-size: 1.1rem; letter-spacing: 1px; font-weight: 700;}
     .footer p { color: #94A3B8; font-size: 0.75rem; letter-spacing: 2px; margin-top: 8px; font-weight: 700;}
@@ -304,19 +289,34 @@ def make_qr_png(data: str, box_size=5) -> bytes:
     return buf.getvalue()
 
 
-# HELPER TO GET ALL IMAGES FROM IMAGES FOLDER
-def get_image_list():
+# HIGH QUALITY CURATED IMAGE SELECTOR (FILTERING OUT LOW QUALITY ASSETS)
+def get_high_quality_images():
+    high_quality_list = []
     try:
         if os.path.exists("images"):
-            files = [os.path.join("images", f) for f in os.listdir("images") if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp', '.avif'))]
-            if files:
-                return files
+            all_files = os.listdir("images")
+            for f in all_files:
+                if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp', '.avif')):
+                    # Exclude known lower-quality or unrefined test thumbs
+                    if "67cad4" not in f and "X9" not in f:
+                        high_quality_list.append(os.path.join("images", f))
     except Exception:
         pass
-    return []
+    
+    # Fallback to Unsplash premium high-res photography if local folder lacks pristine assets
+    if not high_quality_list:
+        high_quality_list = [
+            "https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2032&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=2040&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1511497584788-876761142212?q=80&w=2032&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=2070&auto=format&fit=crop"
+        ]
+    return high_quality_list
 
 
 def get_image_base64(path):
+    if path.startswith("http"):
+        return path
     try:
         with open(path, "rb") as f:
             b64 = base64.b64encode(f.read()).decode()
@@ -327,17 +327,16 @@ def get_image_base64(path):
         return ""
 
 
-# DYNAMIC BACKGROUND SELECTOR PER PAGE/SECTION
-image_list = get_image_list()
+hq_images = get_high_quality_images()
 
-# Map specific background images from the folder per view/page
-bg_mapping = {
-    "ONBOARDING": image_list[0] if len(image_list) > 0 else "images/maxresdefault.jpg",
-    "CHAT": image_list[1] if len(image_list) > 1 else (image_list[0] if image_list else "images/maxresdefault.jpg"),
-    "CATALOGUE": image_list[2] if len(image_list) > 2 else (image_list[0] if image_list else "images/maxresdefault.jpg"),
-    "RESERVE ORDER": image_list[3] if len(image_list) > 3 else (image_list[0] if image_list else "images/maxresdefault.jpg"),
-    "GLOBAL FEED": image_list[4] if len(image_list) > 4 else (image_list[0] if image_list else "images/maxresdefault.jpg"),
-    "FEATURES": image_list[5] if len(image_list) > 5 else (image_list[0] if image_list else "images/maxresdefault.jpg")
+# DEDICATED HIGH-QUALITY BACKGROUND IMAGE ASSIGNMENT PER PAGE
+page_bg_mapping = {
+    "ONBOARDING": hq_images[0] if len(hq_images) > 0 else "images/maxresdefault.jpg",
+    "CHAT": hq_images[1] if len(hq_images) > 1 else hq_images[0],
+    "CATALOGUE": hq_images[2] if len(hq_images) > 2 else hq_images[0],
+    "RESERVE ORDER": hq_images[3] if len(hq_images) > 3 else hq_images[0],
+    "GLOBAL FEED": hq_images[0] if len(hq_images) > 0 else "images/maxresdefault.jpg",
+    "FEATURES": hq_images[1] if len(hq_images) > 1 else hq_images[0]
 }
 
 
@@ -543,17 +542,17 @@ with st.sidebar:
         st.rerun()
 
 
-# DETERMINE CURRENT ACTIVE PAGE FOR DYNAMIC BACKGROUND IMAGE
+# DETERMINE CURRENT ACTIVE PAGE BACKGROUND DYNAMICALLY
 current_page_key = page_selection if st.session_state.authenticated else "ONBOARDING"
-selected_bg_path = bg_mapping.get(current_page_key, image_list[0] if image_list else "images/maxresdefault.jpg")
-bg_b64 = get_image_base64(selected_bg_path)
+selected_bg = page_bg_mapping.get(current_page_key, hq_images[0] if hq_images else "images/maxresdefault.jpg")
+resolved_bg_b64 = get_image_base64(selected_bg)
 
-# Inject dynamic page background
-if bg_b64:
+# Inject dynamic high-res background per page with immersive overlay
+if resolved_bg_b64:
     st.markdown(f"""
     <style>
         .stApp {{
-            background: linear-gradient(rgba(10, 15, 25, 0.45), rgba(10, 15, 25, 0.7)), url('{bg_b64}') !important;
+            background: linear-gradient(rgba(10, 15, 25, 0.4), rgba(10, 15, 25, 0.65)), url('{resolved_bg_b64}') !important;
             background-size: cover !important;
             background-position: center !important;
             background-attachment: fixed !important;
@@ -562,7 +561,7 @@ if bg_b64:
     """, unsafe_allow_html=True)
 
 
-# CINEMATIC EDITORIAL HERO HEADER WITH DYNAMIC SCENIC BACKGROUND
+# CINEMATIC EDITORIAL HERO HEADER
 st.markdown("""
 <div class="cinematic-hero">
     <h1>Seed. Intelligence. Harvest.</h1>
@@ -720,21 +719,21 @@ elif page_selection == "CHAT":
             st.caption("The full document can also be downloaded on the RESERVE ORDER page.")
 
 elif page_selection == "CATALOGUE":
-    st.markdown("<div class='section-header'>PRODUCT CATALOGUE & 3D SHOWCASE</div>", unsafe_allow_html=True)
-    st.caption("Explore our professional agricultural formulations presented in an immersive 3D-depth card interface with dedicated background photography per product.")
+    st.markdown("<div class='section-header'>PRODUCT CATALOGUE & SHOWCASE</div>", unsafe_allow_html=True)
+    st.caption("Explore our professional agricultural formulations presented in a clean grid layout with dedicated high-resolution photography per product.")
 
     cols_grid = st.columns(3)
     for index, row in enumerate(catalog_data):
         p_name, p_cat, p_stock, p_price, p_guide = row[0], row[1], row[2], row[3], row[4]
         
-        # Assign a distinct individual picture from the images folder for each product card
-        product_img = image_list[index % len(image_list)] if image_list else "images/maxresdefault.jpg"
-        img_b64 = get_image_base64(product_img)
+        # Assign a distinct pristine high-resolution image from our filtered list for each product
+        prod_img = hq_images[index % len(hq_images)] if hq_images else "images/maxresdefault.jpg"
+        img_b64 = get_image_base64(prod_img)
         bg_style = f"background-image: linear-gradient(180deg, rgba(15,23,42,0.2) 0%, rgba(15,23,42,0.85) 100%), url('{img_b64}');" if img_b64 else "background-color: #1E293B;"
 
         with cols_grid[index % 3]:
             st.markdown(f"""
-            <div class="product-3d-card">
+            <div class="product-showcase-card">
                 <div class="product-image-container" style="{bg_style}"></div>
                 <span style="background: rgba(52, 211, 153, 0.2); color: #34D399; padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;">{p_cat}</span>
                 <h3 style="font-family: 'Playfair Display', serif; margin: 12px 0 6px 0; font-size: 1.25rem; color: #FFFFFF;">{p_name}</h3>
