@@ -28,7 +28,6 @@ st.markdown("""
     }
     
     .stApp { 
-        background: linear-gradient(rgba(10, 15, 25, 0.45), rgba(10, 15, 25, 0.65)), url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2032&auto=format&fit=crop');
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
@@ -41,33 +40,33 @@ st.markdown("""
         color: #FFFFFF; 
     }
 
-    # Cinematic Hero Section with Rich Scenic Background Overlay
+    # Cinematic Hero Section with Dynamic Scenic Background Overlay
     .cinematic-hero {
         position: relative;
         border-radius: 28px;
         overflow: hidden;
-        background: rgba(15, 23, 42, 0.55);
+        background: rgba(15, 23, 42, 0.45);
         backdrop-filter: blur(14px);
-        padding: 5rem 3rem;
+        padding: 4rem 3rem;
         margin-bottom: 2.5rem;
         border: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         text-align: center;
     }
     
     .cinematic-hero h1 {
         font-family: 'Playfair Display', serif;
-        font-size: 3.8rem;
+        font-size: 3.5rem;
         font-weight: 700;
         letter-spacing: -0.02em;
         color: #FFFFFF;
-        margin: 0 0 10px 0;
+        margin: 0 0 8px 0;
     }
 
     .cinematic-hero p {
         font-family: 'Plus Jakarta Sans', sans-serif;
         color: #34D399;
-        font-size: 1rem;
+        font-size: 0.95rem;
         letter-spacing: 4px;
         font-weight: 700;
         text-transform: uppercase;
@@ -87,7 +86,7 @@ st.markdown("""
 
     # Modern Inputs & Fields
     .stTextInput > div > div > input, .stNumberInput > div > div > input, .stSelectbox > div > div > div {
-        background-color: rgba(30, 41, 59, 0.85) !important; 
+        background-color: rgba(30, 41, 59, 0.8) !important; 
         color: #FFFFFF !important; 
         border: 1px solid rgba(255, 255, 255, 0.25) !important; 
         border-radius: 14px !important;
@@ -120,17 +119,18 @@ st.markdown("""
         background: linear-gradient(135deg, #059669 0%, #047857 100%);
     }
 
-    # Sidebar Modernization
+    # Seamless Gradient Sidebar Replacing Solid Grey/Black Box
     [data-testid="stSidebar"] { 
-        background-color: rgba(6, 9, 15, 0.95); 
+        background: linear-gradient(180deg, rgba(6, 9, 15, 0.95) 0%, rgba(15, 23, 42, 0.9) 100%); 
         border-right: 1px solid rgba(255, 255, 255, 0.15); 
+        backdrop-filter: blur(20px);
     }
     .sidebar-title { color: #FFFFFF; font-size: 1.15rem; font-weight: 800; margin-bottom: 2px; }
     .sidebar-subtitle { color: #94A3B8; font-size: 0.72rem; letter-spacing: 2px; margin-bottom: 15px; font-weight: 700; text-transform: uppercase; }
 
     # Glassmorphism Cards
     .quote-box {
-        background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.15); padding: 30px; border-radius: 24px; color: #FFFFFF; margin-top: 20px;
+        background: rgba(30, 41, 59, 0.75); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.15); padding: 30px; border-radius: 24px; color: #FFFFFF; margin-top: 20px;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
     }
     .quote-box table { width: 100%; border-collapse: collapse; margin: 15px 0; }
@@ -149,7 +149,7 @@ st.markdown("""
 
     # Apple-grade Feature Cards
     .feature-card {
-        background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.15); border-top: 3px solid #34D399;
+        background: rgba(30, 41, 59, 0.65); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.15); border-top: 3px solid #34D399;
         padding: 26px; border-radius: 24px; margin-bottom: 18px; height: 100%;
         box-shadow: 0 15px 35px -10px rgba(0,0,0,0.4);
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease;
@@ -164,7 +164,7 @@ st.markdown("""
 
     # 3D Depth Catalogue Showcase Cards
     .product-3d-card {
-        background: rgba(30, 41, 59, 0.8);
+        background: rgba(30, 41, 59, 0.75);
         backdrop-filter: blur(16px);
         border: 1px solid rgba(255, 255, 255, 0.15);
         border-radius: 24px;
@@ -200,7 +200,16 @@ st.markdown("""
         border: 1px solid rgba(255, 255, 255, 0.15);
     }
 
-    .footer { text-align: center; margin-top: 80px; padding: 30px 0; border-top: 1px solid rgba(255, 255, 255, 0.15); background: rgba(4, 6, 11, 0.95); border-radius: 28px 28px 0 0; }
+    # Seamless Footer without Black Box Rectangle
+    .footer { 
+        text-align: center; 
+        margin-top: 80px; 
+        padding: 30px 0; 
+        border-top: 1px solid rgba(255, 255, 255, 0.15); 
+        background: rgba(4, 6, 11, 0.45); 
+        backdrop-filter: blur(10px);
+        border-radius: 0px; 
+    }
     .footer h4 { font-family: 'Playfair Display', serif; color: #FFFFFF; margin: 0; font-size: 1.1rem; letter-spacing: 1px; font-weight: 700;}
     .footer p { color: #94A3B8; font-size: 0.75rem; letter-spacing: 2px; margin-top: 8px; font-weight: 700;}
 </style>
@@ -295,7 +304,18 @@ def make_qr_png(data: str, box_size=5) -> bytes:
     return buf.getvalue()
 
 
-# HELPER TO CONVERT LOCAL IMAGES FROM FOLDER TO BASE64
+# HELPER TO GET ALL IMAGES FROM IMAGES FOLDER
+def get_image_list():
+    try:
+        if os.path.exists("images"):
+            files = [os.path.join("images", f) for f in os.listdir("images") if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp', '.avif'))]
+            if files:
+                return files
+    except Exception:
+        pass
+    return []
+
+
 def get_image_base64(path):
     try:
         with open(path, "rb") as f:
@@ -305,6 +325,20 @@ def get_image_base64(path):
         return f"data:{mime};base64,{b64}"
     except Exception:
         return ""
+
+
+# DYNAMIC BACKGROUND SELECTOR PER PAGE/SECTION
+image_list = get_image_list()
+
+# Map specific background images from the folder per view/page
+bg_mapping = {
+    "ONBOARDING": image_list[0] if len(image_list) > 0 else "images/maxresdefault.jpg",
+    "CHAT": image_list[1] if len(image_list) > 1 else (image_list[0] if image_list else "images/maxresdefault.jpg"),
+    "CATALOGUE": image_list[2] if len(image_list) > 2 else (image_list[0] if image_list else "images/maxresdefault.jpg"),
+    "RESERVE ORDER": image_list[3] if len(image_list) > 3 else (image_list[0] if image_list else "images/maxresdefault.jpg"),
+    "GLOBAL FEED": image_list[4] if len(image_list) > 4 else (image_list[0] if image_list else "images/maxresdefault.jpg"),
+    "FEATURES": image_list[5] if len(image_list) > 5 else (image_list[0] if image_list else "images/maxresdefault.jpg")
+}
 
 
 # GROQ CLIENT SETUP
@@ -508,7 +542,27 @@ with st.sidebar:
         st.session_state.last_document = None
         st.rerun()
 
-# CINEMATIC EDITORIAL HERO HEADER WITH RICH SCENIC BACKGROUND IMAGE
+
+# DETERMINE CURRENT ACTIVE PAGE FOR DYNAMIC BACKGROUND IMAGE
+current_page_key = page_selection if st.session_state.authenticated else "ONBOARDING"
+selected_bg_path = bg_mapping.get(current_page_key, image_list[0] if image_list else "images/maxresdefault.jpg")
+bg_b64 = get_image_base64(selected_bg_path)
+
+# Inject dynamic page background
+if bg_b64:
+    st.markdown(f"""
+    <style>
+        .stApp {{
+            background: linear-gradient(rgba(10, 15, 25, 0.45), rgba(10, 15, 25, 0.7)), url('{bg_b64}') !important;
+            background-size: cover !important;
+            background-position: center !important;
+            background-attachment: fixed !important;
+        }}
+    </style>
+    """, unsafe_allow_html=True)
+
+
+# CINEMATIC EDITORIAL HERO HEADER WITH DYNAMIC SCENIC BACKGROUND
 st.markdown("""
 <div class="cinematic-hero">
     <h1>Seed. Intelligence. Harvest.</h1>
@@ -667,21 +721,15 @@ elif page_selection == "CHAT":
 
 elif page_selection == "CATALOGUE":
     st.markdown("<div class='section-header'>PRODUCT CATALOGUE & 3D SHOWCASE</div>", unsafe_allow_html=True)
-    st.caption("Explore our professional agricultural formulations presented in an immersive 3D-depth card interface over rich scenic landscape photography.")
-
-    image_filenames = []
-    try:
-        if os.path.exists("images"):
-            image_filenames = [os.path.join("images", f) for f in os.listdir("images") if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp', '.avif'))]
-    except Exception:
-        image_filenames = []
+    st.caption("Explore our professional agricultural formulations presented in an immersive 3D-depth card interface with dedicated background photography per product.")
 
     cols_grid = st.columns(3)
     for index, row in enumerate(catalog_data):
         p_name, p_cat, p_stock, p_price, p_guide = row[0], row[1], row[2], row[3], row[4]
         
-        bg_img = image_filenames[index % len(image_filenames)] if image_filenames else "images/maxresdefault.jpg"
-        img_b64 = get_image_base64(bg_img)
+        # Assign a distinct individual picture from the images folder for each product card
+        product_img = image_list[index % len(image_list)] if image_list else "images/maxresdefault.jpg"
+        img_b64 = get_image_base64(product_img)
         bg_style = f"background-image: linear-gradient(180deg, rgba(15,23,42,0.2) 0%, rgba(15,23,42,0.85) 100%), url('{img_b64}');" if img_b64 else "background-color: #1E293B;"
 
         with cols_grid[index % 3]:
@@ -792,7 +840,7 @@ elif page_selection == "GLOBAL FEED":
     """)
 
 elif page_selection == "FEATURES":
-    st.markdown("<div class='section-header'>WHAT THIS APP DO</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-header'>WHAT THIS APP CAN DO</div>", unsafe_allow_html=True)
     render_features()
 
     st.markdown("### HOW TO PLACE AN ORDER")
