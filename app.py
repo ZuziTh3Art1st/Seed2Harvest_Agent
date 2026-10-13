@@ -22,154 +22,144 @@ st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
-    # Global Atmospheric Minimalism Theme
+    # Global Atmospheric Minimalism Theme inspired by natural landscapes & editorial design
     html, body, [class*="css"] {
         font-family: 'Plus Jakarta Sans', sans-serif;
     }
     
     .stApp { 
-        background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%); 
-        color: #1E293B; 
+        background: #090D16; 
+        color: #F1F5F9; 
     }
 
     h1, h2, h3 { 
         font-family: 'Plus Jakarta Sans', sans-serif; 
         font-weight: 700; 
-        color: #0F172A; 
+        color: #F8FAFC; 
     }
 
-    # Custom Header Styling
-    .hero-container {
-        background: #FFFFFF;
-        border: 1px solid #E2E8F0;
-        border-radius: 20px;
-        padding: 2rem;
+    # Editorial Hero & Cinematic Header
+    .hero-editorial {
+        position: relative;
+        border-radius: 24px;
+        overflow: hidden;
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.4) 0%, rgba(15, 23, 42, 0.85) 100%), url('app/static/banner.jpg');
+        background-size: cover;
+        background-position: center;
+        padding: 3rem 2.5rem;
         margin-bottom: 2rem;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
     }
     
-    .main-title { 
-        color: #0F172A; 
-        font-size: 2.5rem; 
-        line-height: 1.1; 
+    .hero-editorial h1 {
+        font-size: 3rem;
         font-weight: 800;
-        letter-spacing: -0.025em;
+        letter-spacing: -0.03em;
+        color: #FFFFFF;
         margin: 0;
+        text-transform: none;
     }
-    
-    .sub-title { 
-        color: #059669; 
-        font-size: 0.85rem; 
-        letter-spacing: 3px; 
-        font-weight: 700; 
+
+    .hero-editorial p {
+        color: #34D399;
+        font-size: 0.95rem;
+        letter-spacing: 3px;
+        font-weight: 700;
         text-transform: uppercase;
-        margin-top: 6px;
+        margin-top: 8px;
     }
 
     .section-header { 
-        color: #0F172A; 
-        font-size: 1.25rem; 
+        color: #F8FAFC; 
+        font-size: 1.35rem; 
         margin-top: 1.5rem; 
         margin-bottom: 1rem; 
         font-weight: 700;
         letter-spacing: -0.01em;
-        display: flex;
-        align-items: center;
-        gap: 8px;
+        border-bottom: 2px solid #1E293B;
+        padding-bottom: 8px;
     }
-
-    # Banner image
-    .hero-banner {
-        width: 100%; height: 130px; object-fit: cover; object-position: center;
-        border-radius: 14px; border: 1px solid #E2E8F0; display: block; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        margin-bottom: 1.5rem;
-    }
-    .hero-placeholder { height: 80px; background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 14px; margin-bottom: 1.5rem; }
 
     # Modern Input Fields
     .stTextInput > div > div > input, .stNumberInput > div > div > input, .stSelectbox > div > div > div {
-        background-color: #FFFFFF !important; 
-        color: #0F172A !important; 
-        border: 1px solid #CBD5E1 !important; 
+        background-color: #1E293B !important; 
+        color: #F8FAFC !important; 
+        border: 1px solid #334155 !important; 
         border-radius: 12px !important;
         padding: 0.6rem 1rem !important;
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
     }
     .stTextInput > div > div > input:focus { 
-        border-color: #059669 !important; 
-        box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1) !important; 
+        border-color: #10B981 !important; 
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15) !important; 
     }
 
     .custom-warning {
-        background-color: #ECFDF5; color: #065F46; padding: 16px; border-radius: 14px; margin: 15px 0; font-size: 0.92rem; border: 1px solid #A7F3D0;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        background-color: rgba(16, 185, 129, 0.1); color: #34D399; padding: 16px; border-radius: 14px; margin: 15px 0; font-size: 0.92rem; border: 1px solid rgba(16, 185, 129, 0.3);
     }
 
     # Action Buttons
     .stButton > button, .stDownloadButton > button, [data-testid="stFormSubmitButton"] > button {
-        background: linear-gradient(135deg, #059669 0%, #047857 100%); 
+        background: linear-gradient(135deg, #10B981 0%, #059669 100%); 
         color: #FFFFFF; 
         border: none; 
         border-radius: 12px; 
-        font-weight: 600; 
-        padding: 0.6rem 1.25rem;
+        font-weight: 700; 
+        padding: 0.65rem 1.4rem;
         letter-spacing: 0.3px;
-        box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
+        box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .stButton > button:hover, .stDownloadButton > button:hover, [data-testid="stFormSubmitButton"] > button:hover { 
-        transform: translateY(-1px);
-        box-shadow: 0 6px 16px rgba(5, 150, 105, 0.3);
-        background: linear-gradient(135deg, #047857 0%, #065F46 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
     }
 
     # Sidebar Modernization
     [data-testid="stSidebar"] { 
-        background-color: #FFFFFF; 
-        border-right: 1px solid #E2E8F0; 
-        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.02);
+        background-color: #0B0F19; 
+        border-right: 1px solid #1E293B; 
     }
-    .sidebar-title { color: #0F172A; font-size: 1.1rem; font-weight: 800; margin-bottom: 2px; letter-spacing: -0.01em; }
+    .sidebar-title { color: #F8FAFC; font-size: 1.1rem; font-weight: 800; margin-bottom: 2px; letter-spacing: -0.01em; }
     .sidebar-subtitle { color: #64748B; font-size: 0.72rem; letter-spacing: 1.5px; margin-bottom: 15px; font-weight: 700; text-transform: uppercase; }
 
-    # Glass & Clean Cards
+    # Glassmorphism Cards
     .quote-box {
-        background-color: #FFFFFF; border: 1px solid #E2E8F0; padding: 28px; border-radius: 16px; font-family: 'Plus Jakarta Sans', sans-serif; color: #0F172A; margin-top: 20px;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        background-color: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); padding: 28px; border-radius: 20px; color: #F8FAFC; margin-top: 20px;
+        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
     }
     .quote-box table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-    .quote-box th { text-align: left; color: #059669; border-bottom: 2px solid #E2E8F0; padding: 10px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; }
-    .quote-box td { padding: 10px; border-bottom: 1px solid #F1F5F9; font-size: 0.92rem; color: #334155; }
+    .quote-box th { text-align: left; color: #34D399; border-bottom: 2px solid #334155; padding: 10px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; }
+    .quote-box td { padding: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.92rem; color: #CBD5E1; }
 
     [data-testid="stForm"] { border: none !important; padding: 0 !important; background: transparent !important; }
     
     a.mailto-btn {
-        display: inline-block; background: linear-gradient(135deg, #059669 0%, #047857 100%); color: #FFFFFF !important; text-decoration: none !important;
+        display: inline-block; background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: #FFFFFF !important; text-decoration: none !important;
         padding: 12px 22px; border-radius: 12px; font-weight: 700; letter-spacing: 0.3px; font-size: 0.88rem; margin: 8px 0 15px 0;
-        box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+        box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
         transition: all 0.2s ease;
     }
-    a.mailto-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(5, 150, 105, 0.35); }
+    a.mailto-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45); }
 
     # Feature Grid Cards
     .feature-card {
-        background-color: #FFFFFF; border: 1px solid #E2E8F0; border-top: 4px solid #059669;
-        padding: 22px; border-radius: 16px; margin-bottom: 16px; height: 100%;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.06); border-top: 4px solid #10B981;
+        padding: 24px; border-radius: 20px; margin-bottom: 16px; height: 100%;
+        box-shadow: 0 10px 30px -10px rgba(0,0,0,0.3);
+        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
     }
     .feature-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.06);
+        transform: translateY(-4px);
+        box-shadow: 0 20px 40px -15px rgba(16, 185, 129, 0.2);
+        border-color: rgba(16, 185, 129, 0.3);
     }
-    .feature-card h4 { color: #0F172A; margin: 0 0 8px 0; font-size: 1.05rem; font-weight: 700; }
-    .feature-card p { color: #64748B; margin: 0; font-size: 0.9rem; line-height: 1.5; }
+    .feature-card h4 { color: #FFFFFF; margin: 0 0 10px 0; font-size: 1.1rem; font-weight: 700; }
+    .feature-card p { color: #94A3B8; margin: 0; font-size: 0.9rem; line-height: 1.6; }
 
-    .footer { text-align: center; margin-top: 50px; padding: 20px 0; border-top: 1px solid #E2E8F0; background: #FFFFFF; border-radius: 16px 16px 0 0; }
-    .footer h4 { color: #0F172A; margin: 0; font-size: 0.95rem; letter-spacing: 1px; font-weight: 700;}
+    .footer { text-align: center; margin-top: 60px; padding: 25px 0; border-top: 1px solid #1E293B; background: #0B0F19; border-radius: 24px 24px 0 0; }
+    .footer h4 { color: #F8FAFC; margin: 0; font-size: 0.95rem; letter-spacing: 1px; font-weight: 700;}
     .footer p { color: #64748B; font-size: 0.75rem; letter-spacing: 1px; margin-top: 6px; font-weight: 600;}
 </style>
 """, unsafe_allow_html=True)
@@ -261,17 +251,6 @@ def make_qr_png(data: str, box_size=5) -> bytes:
     buf = BytesIO()
     img.save(buf, format="PNG")
     return buf.getvalue()
-
-
-def load_banner_html(path="images/maxresdefault.jpg"):
-    try:
-        with open(path, "rb") as f:
-            b64 = base64.b64encode(f.read()).decode()
-        ext = path.rsplit(".", 1)[-1].lower()
-        mime = "image/png" if ext == "png" else "image/jpeg"
-        return f"<img class='hero-banner' src='data:{mime};base64,{b64}'/>"
-    except Exception:
-        return "<div class='hero-placeholder'></div>"
 
 
 # GROQ CLIENT SETUP
@@ -475,14 +454,11 @@ with st.sidebar:
         st.session_state.last_document = None
         st.rerun()
 
-# MODERN APP HEADER SECTION
-st.markdown(load_banner_html(), unsafe_allow_html=True)
+# CINEMATIC EDITORIAL HERO HEADER
 st.markdown("""
-<div class="hero-container">
-    <div>
-        <div class="main-title">SEED 2 HARVEST</div>
-        <div class="sub-title">Agricultural Intelligence & Operations Suite</div>
-    </div>
+<div class="hero-editorial">
+    <h1>Seed. Intelligence. Harvest.</h1>
+    <p>Advanced Agricultural Operations Suite</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -749,7 +725,7 @@ elif page_selection == "FEATURES":
     1. Open **CATALOGUE** and set quantities. Your basket fills in the sidebar.
     2. Ask the **CHAT** agent for advice on dosage or what suits your crop.
     3. Open **RESERVE ORDER**, enter your contact number and pick Invoice or QR Quotation.
-    4. Press **PROCESS TRANSACTION**. Then use the email button to send it from your own email app, or download the document.
+    4. Process the order and dispatch documentation.
     """)
 
 # FOOTER
