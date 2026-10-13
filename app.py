@@ -11,7 +11,7 @@ from io import BytesIO
 from groq import Groq
 import The_Database as db
 
-# ================= PAGE CONFIG & STYLING =================
+# PAGE CONFIG & STYLING
 st.set_page_config(
     page_title="Seed 2 Harvest | Strategic Agent",
     layout="wide",
@@ -20,67 +20,123 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-    .stApp { background-color: #0e1117; color: #fafafa; }
-    h1, h2, h3 { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 800; text-transform: uppercase; }
-    .main-title { color: #ffffff; font-size: 2rem; line-height: 1.1; margin-bottom: 0px; margin-top: 5px;}
-    .sub-title { color: #c69c6d; font-size: 0.8rem; letter-spacing: 3px; font-weight: 600; margin-bottom: 10px;}
-    .section-header { color: #c69c6d; font-size: 1.3rem; margin-top: 10px; margin-bottom: 10px;}
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-    /* Hero banner: rendered as a single <img> so the height limit really applies */
+    # Global Modern Reset
+    html, body, [class*="css"] {
+        font-family: 'Inter', sans-serif;
+    }
+    
+    .stApp { 
+        background-color: #F8FAFC; 
+        color: #0F172A; 
+    }
+
+    h1, h2, h3 { 
+        font-family: 'Inter', sans-serif; 
+        font-weight: 700; 
+        color: #0F172A; 
+    }
+
+    .main-title { 
+        color: #0F172A; 
+        font-size: 2.25rem; 
+        line-height: 1.1; 
+        margin-bottom: 2px; 
+        margin-top: 5px;
+        font-weight: 700;
+    }
+    
+    .sub-title { 
+        color: #059669; 
+        font-size: 0.85rem; 
+        letter-spacing: 2px; 
+        font-weight: 600; 
+        margin-bottom: 15px;
+        text-transform: uppercase;
+    }
+    
+    .section-header { 
+        color: #0F172A; 
+        font-size: 1.25rem; 
+        margin-top: 20px; 
+        margin-bottom: 12px; 
+        font-weight: 600;
+        border-bottom: 2px solid #E2E8F0;
+        padding-bottom: 6px;
+    }
+
+    # Hero banner
     .hero-banner {
         width: 100%; height: 110px; object-fit: cover; object-position: center;
-        border-radius: 4px; border: 1px solid #333; display: block;
+        border-radius: 12px; border: 1px solid #E2E8F0; display: block; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
-    .hero-placeholder { height: 60px; background-color: #1a1e23; border: 1px solid #333; border-radius: 4px; }
+    .hero-placeholder { height: 60px; background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; }
 
+    # Inputs & Fields
     .stTextInput > div > div > input, .stNumberInput > div > div > input, .stSelectbox > div > div > div {
-        background-color: #1e2127; color: #ffffff; border: 1px solid #333333;
+        background-color: #FFFFFF; color: #0F172A; border: 1px solid #CBD5E1; border-radius: 8px;
     }
-    .stTextInput > div > div > input:focus { border-color: #c69c6d; box-shadow: none; }
+    .stTextInput > div > div > input:focus { border-color: #059669; box-shadow: 0 0 0 2px rgba(5,150,105,0.1); }
 
     .custom-warning {
-        background-color: #3b4020; color: #d7ffd9; padding: 12px; border-radius: 5px; margin: 10px 0; font-size: 0.9rem;
+        background-color: #ECFDF5; color: #065F46; padding: 14px; border-radius: 10px; margin: 12px 0; font-size: 0.9rem; border: 1px solid #A7F3D0;
     }
 
+    # Buttons
     .stButton > button, .stDownloadButton > button, [data-testid="stFormSubmitButton"] > button {
-        background-color: #1e2127; color: #ffffff; border: 1px solid #c69c6d; border-radius: 4px; font-weight: 600; letter-spacing: 1px;
+        background-color: #059669; color: #FFFFFF; border: none; border-radius: 8px; font-weight: 600; letter-spacing: 0.5px;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        transition: all 0.2s ease-in-out;
     }
-    .stButton > button:hover, .stDownloadButton > button:hover, [data-testid="stFormSubmitButton"] > button:hover { background-color: #c69c6d; color: #000000; border: 1px solid #c69c6d; }
+    .stButton > button:hover, .stDownloadButton > button:hover, [data-testid="stFormSubmitButton"] > button:hover { 
+        background-color: #047857; color: #FFFFFF; box-shadow: 0 4px 6px -1px rgba(5, 150, 105, 0.2);
+    }
 
-    [data-testid="stSidebar"] { background-color: #16181c; border-right: 1px solid #333; }
-    .sidebar-title { color: #c69c6d; font-size: 1.1rem; font-weight: bold; margin-bottom: 15px;}
-    .sidebar-subtitle { color: #888888; font-size: 0.7rem; letter-spacing: 1px; margin-bottom: 8px;}
+    # Sidebar Styling
+    [data-testid="stSidebar"] { 
+        background-color: #FFFFFF; 
+        border-right: 1px solid #E2E8F0; 
+    }
+    .sidebar-title { color: #0F172A; font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+    .sidebar-subtitle { color: #64748B; font-size: 0.7rem; letter-spacing: 1px; margin-bottom: 12px; font-weight: 600; }
 
+    # Quote & Document Cards
     .quote-box {
-        background-color: #16181c; border: 2px solid #c69c6d; padding: 20px; border-radius: 6px; font-family: monospace; color: #fff; margin-top: 15px;
+        background-color: #FFFFFF; border: 1px solid #E2E8F0; padding: 24px; border-radius: 12px; font-family: 'Inter', sans-serif; color: #0F172A; margin-top: 15px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
     }
-    .quote-box table { width: 100%; border-collapse: collapse; margin: 10px 0; }
-    .quote-box th { text-align: left; color: #c69c6d; border-bottom: 1px solid #444; padding: 4px; }
-    .quote-box td { padding: 4px; border-bottom: 1px solid #2a2d33; }
+    .quote-box table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+    .quote-box th { text-align: left; color: #059669; border-bottom: 2px solid #E2E8F0; padding: 8px; font-size: 0.85rem; }
+    .quote-box td { padding: 8px; border-bottom: 1px solid #F1F5F9; font-size: 0.9rem; }
 
     [data-testid="stForm"] { border: none !important; padding: 0 !important; }
+    
     a.mailto-btn {
-        display: inline-block; background-color: #c69c6d; color: #000000 !important; text-decoration: none !important;
-        padding: 10px 18px; border-radius: 4px; font-weight: 700; letter-spacing: 1px; font-size: 0.85rem; margin: 6px 0 12px 0;
+        display: inline-block; background-color: #059669; color: #FFFFFF !important; text-decoration: none !important;
+        padding: 10px 18px; border-radius: 8px; font-weight: 600; letter-spacing: 0.5px; font-size: 0.85rem; margin: 6px 0 12px 0;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     }
-    a.mailto-btn:hover { background-color: #e0b784; }
+    a.mailto-btn:hover { background-color: #047857; }
 
+    # Feature Cards
     .feature-card {
-        background-color: #16181c; border: 1px solid #333; border-left: 3px solid #c69c6d;
-        padding: 14px 16px; border-radius: 6px; margin-bottom: 12px; min-height: 120px;
+        background-color: #FFFFFF; border: 1px solid #E2E8F0; border-left: 4px solid #059669;
+        padding: 18px; border-radius: 10px; margin-bottom: 14px; min-height: 130px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
     }
-    .feature-card h4 { color: #c69c6d; margin: 0 0 6px 0; font-size: 1rem; letter-spacing: 1px; }
-    .feature-card p { color: #d0d0d0; margin: 0; font-size: 0.88rem; line-height: 1.45; }
+    .feature-card h4 { color: #0F172A; margin: 0 0 6px 0; font-size: 1rem; font-weight: 600; }
+    .feature-card p { color: #475569; margin: 0; font-size: 0.88rem; line-height: 1.5; }
 
-    .footer { text-align: center; margin-top: 30px; padding-top: 10px; border-top: 1px solid #333; }
-    .footer h4 { color: #c69c6d; margin: 0; font-size: 1rem; letter-spacing: 2px;}
-    .footer p { color: #666666; font-size: 0.7rem; letter-spacing: 1px; margin-top: 3px;}
+    .footer { text-align: center; margin-top: 40px; padding-top: 15px; border-top: 1px solid #E2E8F0; }
+    .footer h4 { color: #0F172A; margin: 0; font-size: 0.9rem; letter-spacing: 1px; font-weight: 600;}
+    .footer p { color: #64748B; font-size: 0.7rem; letter-spacing: 1px; margin-top: 4px;}
 </style>
 """, unsafe_allow_html=True)
 
 db.init_db()
 
-# ================= SESSION STATE =================
+# SESSION STATE
 if "authenticated" not in st.session_state: st.session_state.authenticated = False
 if "user_data" not in st.session_state: st.session_state.user_data = {"name": "", "farm": "", "location": "", "email": ""}
 if "messages" not in st.session_state: st.session_state.messages = []
@@ -88,8 +144,7 @@ if "basket" not in st.session_state: st.session_state.basket = {}
 if "last_document" not in st.session_state: st.session_state.last_document = None
 
 
-# ================= HELPERS =================
-# Banks shown as scannable QR codes on the quotation. Each QR opens that bank's website / online banking.
+# HELPERS
 BANKS = [
     ("FNB", "https://www.fnb.co.za"),
     ("Standard Bank", "https://www.standardbank.co.za"),
@@ -98,8 +153,6 @@ BANKS = [
     ("Capitec", "https://www.capitecbank.co.za"),
 ]
 
-# Your banking details, shown under the QR codes and put in the email. Fill in the empty ones.
-# Empty values are left out, nothing is invented.
 BENEFICIARY = {
     "Account name": "Seed 2 Harvest (Pty) Ltd",
     "Bank": "",
@@ -109,7 +162,6 @@ BENEFICIARY = {
 }
 
 def get_secret(name, default=None):
-    """Read from environment first, then Streamlit secrets."""
     val = os.environ.get(name)
     if val:
         return val
@@ -143,7 +195,6 @@ class AgriculturalMiddleware:
 
 @st.cache_data(show_spinner=False, ttl=86400)
 def geocode_location(query: str):
-    """Turn the client's typed location into lat/lon using OpenStreetMap Nominatim."""
     if not query or not query.strip():
         return None
     headers = {"User-Agent": "seed2harvest-streamlit-app/1.0"}
@@ -183,7 +234,7 @@ def load_banner_html(path="images/maxresdefault.jpg"):
         return "<div class='hero-placeholder'></div>"
 
 
-# ================= GROQ CLIENT SETUP =================
+# GROQ CLIENT SETUP
 GROQ_API_KEY = get_secret("GROQ_API_KEY")
 groq_client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
 
@@ -212,7 +263,6 @@ def basket_context() -> str:
 
 
 def set_basket_qty(product_name):
-    """on_change callback for catalogue quantity inputs."""
     qty = st.session_state.get(f"cat_{product_name}", 0)
     if qty and qty > 0:
         st.session_state.basket[product_name] = int(qty)
@@ -222,13 +272,11 @@ def set_basket_qty(product_name):
 
 def clear_basket():
     st.session_state.basket = {}
-    # reset catalogue widgets too, otherwise they would re-add the old quantities
     for k in [k for k in st.session_state.keys() if k.startswith("cat_")]:
         del st.session_state[k]
 
 
 def payment_lines(inv_no, grand_total):
-    """Reference, amount and any filled-in banking details, as plain lines."""
     lines = [f"Payment reference: {inv_no}", f"Amount to pay: R{grand_total:.2f}"]
     filled = [(k, v) for k, v in BENEFICIARY.items() if v]
     lines += [f"{k}: {v}" for k, v in filled]
@@ -238,7 +286,6 @@ def payment_lines(inv_no, grand_total):
 
 
 def generate_and_send(doc_type, location_input, phone, email_input):
-    """Build the invoice / QR quotation from the live basket, email it, and store it for display."""
     active_items = [(p, q) for p, q in st.session_state.basket.items() if q > 0]
     subtotal, tax_total, grand_total = basket_totals()
     now = pd.Timestamp.now()
@@ -313,7 +360,6 @@ def generate_and_send(doc_type, location_input, phone, email_input):
         + "PAYMENT DETAILS\n" + "\n".join(pay_list) + "\n\nSeed 2 Harvest"
     )
 
-    # Opens the person's own email app with the message filled in. No account or API key needed.
     mailto_url = (
         f"mailto:{quote(email_input)}"
         f"?cc={quote('support@seed2harvest.co.za')}"
@@ -337,9 +383,7 @@ def generate_and_send(doc_type, location_input, phone, email_input):
 
 
 def render_email_status(doc):
-    """Offer ways to send the generated document from the person's own email."""
     st.success(f"{doc['doc_type']} ready. Choose how you want to send it.")
-    # target=_blank is required: Streamlit runs inside a frame, so a plain mailto: link turns the page blank.
     st.markdown(
         f"<a class='mailto-btn' href='{doc['gmail']}' target='_blank' rel='noopener noreferrer'>OPEN IN GMAIL</a> &nbsp; "
         f"<a class='mailto-btn' href='{doc['mailto']}' target='_blank' rel='noopener noreferrer'>OPEN IN OTHER EMAIL APP</a>",
@@ -351,7 +395,7 @@ def render_email_status(doc):
         st.code(doc["email_text"], language=None)
 
 
-# ================= SIDEBAR NAVIGATION & REAL-TIME BASKET =================
+# SIDEBAR NAVIGATION & REAL-TIME BASKET
 with st.sidebar:
     st.markdown("<div class='sidebar-title'>ERTG</div>", unsafe_allow_html=True)
     st.markdown("<div class='sidebar-subtitle'>OPERATIONS</div>", unsafe_allow_html=True)
@@ -391,12 +435,12 @@ with st.sidebar:
         st.session_state.last_document = None
         st.rerun()
 
-# ================= COMPACT MAIN HEADER =================
+# COMPACT MAIN HEADER
 st.markdown(load_banner_html(), unsafe_allow_html=True)
 st.markdown("<div class='main-title'>SEED 2 HARVEST</div>", unsafe_allow_html=True)
 st.markdown("<div class='sub-title'>ELEVATE YOUR EVERYDAY</div>", unsafe_allow_html=True)
 
-# ================= FEATURES CONTENT (shared) =================
+# FEATURES CONTENT (shared)
 FEATURES = [
     ("STRATEGIC AGENT", "Chat with an AI advisor grounded in our certified product catalogue. It knows your farm profile and what is in your basket, and understands Afrikaans farming slang."),
     ("LIVE CATALOGUE", "Browse products with current stock and pricing. Set quantities and your basket updates instantly in the sidebar."),
@@ -419,7 +463,7 @@ def render_features():
             )
 
 
-# ================= VIEWS =================
+# VIEWS
 
 if not st.session_state.authenticated:
     st.markdown("<div class='section-header'>CLIENT ONBOARDING</div>", unsafe_allow_html=True)
@@ -429,7 +473,6 @@ if not st.session_state.authenticated:
 
     col_form, _ = st.columns([2, 1])
     with col_form:
-        # st.form submits every field's current value in one go, so browser autofill is captured.
         with st.form("onboarding_form", clear_on_submit=False):
             client_name = st.text_input("NAME", key="onboard_name")
             client_farm = st.text_input("FARM / COMPANY", key="onboard_farm")
@@ -462,7 +505,6 @@ if not st.session_state.authenticated:
 elif page_selection == "CHAT":
     st.markdown("<div class='section-header'>STRATEGIC AGENT</div>", unsafe_allow_html=True)
 
-    # Built on every rerun, so the basket section is always current.
     USER_IDENTITY_PROMPT = f"""
     You are the Seed 2 Harvest Strategic Agent.
     SMME Partner: Shaun Cairns (Cape Town, South Africa).
@@ -506,7 +548,6 @@ elif page_selection == "CHAT":
         else:
             try:
                 conversation_history = [{"role": "system", "content": USER_IDENTITY_PROMPT}]
-                # all earlier turns as-is, latest user turn normalised for slang
                 for m in st.session_state.messages[:-1]:
                     conversation_history.append({"role": m["role"], "content": m["content"]})
                 conversation_history.append({"role": "user", "content": normalized_prompt})
@@ -524,7 +565,6 @@ elif page_selection == "CHAT":
             except Exception as err:
                 st.error(f"Inference Engine Error: {err}")
 
-    # ---- Send-document panel: appears when the conversation is about billing and the basket has items ----
     _billing_words = ("invoice", "quote", "quotation", "qr", "email", "bill", "order")
     _recent = " ".join(m["content"].lower() for m in st.session_state.messages[-3:])
     _chat_items = [(p, q) for p, q in st.session_state.basket.items() if q > 0]
@@ -600,7 +640,6 @@ elif page_selection == "RESERVE ORDER":
         else:
             generate_and_send(doc_type, location_input, phone, email_input)
 
-    # Persisted so it survives reruns (e.g. pressing the download button)
     doc = st.session_state.last_document
     if doc:
         render_email_status(doc)
@@ -667,7 +706,7 @@ elif page_selection == "FEATURES":
     4. Press **PROCESS TRANSACTION**. Then use the email button to send it from your own email app, or download the document.
     """)
 
-# ================= FOOTER =================
+# FOOTER
 st.markdown("""
 <div class='footer'>
     <h4>BUZUZI INCORPORATED</h4>
