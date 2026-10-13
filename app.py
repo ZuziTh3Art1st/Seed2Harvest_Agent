@@ -21,7 +21,7 @@ st.set_page_config(
 
 # HELPER TO GET ALL IMAGES FROM IMAGES FOLDER
 def get_high_quality_images():
-    high_quality_list = []
+    high_quality_list_buz = []
     try:
         if os.path.exists("images"):
             all_files = os.listdir("images")
@@ -29,19 +29,19 @@ def get_high_quality_images():
                 if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp', '.avif')):
                     # Exclude low-res test thumbs
                     if "67cad4" not in f and "X9" not in f:
-                        high_quality_list.append(os.path.join("images", f))
+                        high_quality_list_buz.append(os.path.join("images", f))
     except Exception:
         pass
     
     # Fallback to premium high-res photography if local folder lacks assets
-    if not high_quality_list:
-        high_quality_list = [
+    if not high_quality_list_buz:
+        high_quality_list_buz = [
             "https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2032&auto=format&fit=crop",
             "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=2040&auto=format&fit=crop",
             "https://images.unsplash.com/photo-1511497584788-876761142212?q=80&w=2032&auto=format&fit=crop",
             "https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=2070&auto=format&fit=crop"
         ]
-    return high_quality_list
+    return high_quality_list_buz
 
 def get_image_base64(path):
     if path.startswith("http"):
@@ -55,7 +55,7 @@ def get_image_base64(path):
     except Exception:
         return ""
 
-hq_images = get_high_quality_images()
+hq_images_buz = get_high_quality_images()
 
 # INITIALIZE STATE & ROUTING
 if "authenticated" not in st.session_state: st.session_state.authenticated = False
@@ -64,20 +64,18 @@ if "messages" not in st.session_state: st.session_state.messages = []
 if "basket" not in st.session_state: st.session_state.basket = {}
 if "last_document" not in st.session_state: st.session_state.last_document = None
 
-# We must check the query params or session state to know what page we are on BEFORE applying CSS
-# Streamlit sidebar execution happens top-down, but we can set a default
 current_page = "ONBOARDING" if not st.session_state.authenticated else st.session_state.get("current_page", "CHAT")
 
-page_bg_mapping = {
-    "ONBOARDING": hq_images[0] if len(hq_images) > 0 else "images/maxresdefault.jpg",
-    "CHAT": hq_images[1] if len(hq_images) > 1 else hq_images[0],
-    "CATALOGUE": hq_images[2] if len(hq_images) > 2 else hq_images[0],
-    "RESERVE ORDER": hq_images[3] if len(hq_images) > 3 else hq_images[0],
-    "GLOBAL FEED": hq_images[4] if len(hq_images) > 4 else hq_images[0],
-    "FEATURES": hq_images[5] if len(hq_images) > 5 else hq_images[0]
+page_bg_mapping_buz = {
+    "ONBOARDING": hq_images_buz[0] if len(hq_images_buz) > 0 else "images/maxresdefault.jpg",
+    "CHAT": hq_images_buz[1] if len(hq_images_buz) > 1 else hq_images_buz[0],
+    "CATALOGUE": hq_images_buz[2] if len(hq_images_buz) > 2 else hq_images_buz[0],
+    "RESERVE ORDER": hq_images_buz[3] if len(hq_images_buz) > 3 else hq_images_buz[0],
+    "GLOBAL FEED": hq_images_buz[4] if len(hq_images_buz) > 4 else hq_images_buz[0],
+    "FEATURES": hq_images_buz[5] if len(hq_images_buz) > 5 else hq_images_buz[0]
 }
 
-bg_path = page_bg_mapping.get(current_page, hq_images[0])
+bg_path = page_bg_mapping_buz.get(current_page, hq_images_buz[0])
 bg_b64 = get_image_base64(bg_path)
 
 # ================= GLOBAL AGGRESSIVE CSS OVERRIDE =================
@@ -143,15 +141,15 @@ st.markdown(f"""
     }}
     [data-testid="stSidebar"] > div:first-child {{ background-color: transparent !important; }}
     
-    /* 6. Form Inputs & Chat Box */
-    .stTextInput input, .stNumberInput input, .stSelectbox div[data-baseweb="select"], [data-testid="stChatInput"] {{
+    /* 6. Form Inputs & Regular Fields */
+    .stTextInput input, .stNumberInput input, .stSelectbox div[data-baseweb="select"] {{
         background-color: rgba(15, 23, 42, 0.65) !important; 
         color: #FFFFFF !important; 
         border: 1px solid rgba(255, 255, 255, 0.2) !important; 
         border-radius: 12px !important;
         backdrop-filter: blur(10px) !important;
     }}
-    .stTextInput input:focus, [data-testid="stChatInput"]:focus-within {{ 
+    .stTextInput input:focus {{ 
         border-color: #34D399 !important; 
         box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.3) !important; 
     }}
@@ -183,6 +181,23 @@ st.markdown(f"""
         padding: 1.5rem !important;
         margin-bottom: 1rem !important;
         box-shadow: 0 10px 25px rgba(0,0,0,0.2) !important;
+    }}
+
+    /* 9. Bottom Chat Container Glass Effect Overrides White Bar */
+    [data-testid="stBottom"] > div {{
+        background-color: rgba(10, 15, 25, 0.3) !important;
+        backdrop-filter: blur(25px) !important;
+        -webkit-backdrop-filter: blur(25px) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }}
+    .stChatInputContainer {{
+        background-color: rgba(15, 23, 42, 0.75) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        border-radius: 16px !important;
+    }}
+    .stChatInputContainer textarea {{
+        color: #FFFFFF !important;
+        background-color: transparent !important;
     }}
     
     /* Chat Quick Guide */
@@ -310,29 +325,29 @@ def make_qr_png(data: str, box_size=5) -> bytes:
 GROQ_API_KEY = get_secret("GROQ_API_KEY")
 groq_client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
 
-catalog_data = db.fetch_inventory()
-price_map = {row[0]: row[3] for row in catalog_data}
-catalog_context = "\n".join([f"- Product: {row[0]} | Category: {row[1]} | Stock: {row[2]} units | Price: R{row[3]:.2f} | Safe Usage: {row[4]}" for row in catalog_data])
+catalog_data_buz = db.fetch_inventory()
+price_map_buz = {row[0]: row[3] for row in catalog_data_buz}
+catalog_context_buz = "\n".join([f"- Product: {row[0]} | Category: {row[1]} | Stock: {row[2]} units | Price: R{row[3]:.2f} | Safe Usage: {row[4]}" for row in catalog_data_buz])
 
-def basket_totals():
-    subtotal = sum(price_map.get(p, 0.0) * q for p, q in st.session_state.basket.items() if q > 0)
+def basket_totals_buz():
+    subtotal = sum(price_map_buz.get(p, 0.0) * q for p, q in st.session_state.basket.items() if q > 0)
     vat = subtotal * 0.15
     return subtotal, vat, subtotal + vat
 
-def basket_context() -> str:
+def basket_context_buz() -> str:
     items = [(p, q) for p, q in st.session_state.basket.items() if q > 0]
     if not items: return "The client's basket is currently EMPTY."
-    lines = [f"- {q}x {p} @ R{price_map.get(p, 0.0):.2f} = R{price_map.get(p, 0.0) * q:.2f}" for p, q in items]
-    subtotal, vat, total = basket_totals()
+    lines = [f"- {q}x {p} @ R{price_map_buz.get(p, 0.0):.2f} = R{price_map_buz.get(p, 0.0) * q:.2f}" for p, q in items]
+    subtotal, vat, total = basket_totals_buz()
     lines.append(f"Subtotal: R{subtotal:.2f} | VAT (15%): R{vat:.2f} | Total: R{total:.2f}")
     return "\n".join(lines)
 
-def set_basket_qty(product_name):
+def set_basket_qty_buz(product_name):
     qty = st.session_state.get(f"cat_{product_name}", 0)
     if qty and qty > 0: st.session_state.basket[product_name] = int(qty)
     else: st.session_state.basket.pop(product_name, None)
 
-def clear_basket():
+def clear_basket_buz():
     st.session_state.basket = {}
     for k in [k for k in st.session_state.keys() if k.startswith("cat_")]: del st.session_state[k]
 
@@ -345,13 +360,13 @@ def payment_lines(inv_no, grand_total):
 
 def generate_and_send(doc_type, location_input, phone, email_input):
     active_items = [(p, q) for p, q in st.session_state.basket.items() if q > 0]
-    subtotal, tax_total, grand_total = basket_totals()
+    subtotal, tax_total, grand_total = basket_totals_buz()
     now = pd.Timestamp.now()
     inv_no = f"INV-{now.strftime('%Y%m%d-%H%M%S')}"
     date_str = now.strftime('%Y-%m-%d')
     e = html.escape
-    rows_html = "".join(f"<tr><td>{e(p)}</td><td>{q}</td><td>R{price_map.get(p, 0.0):.2f}</td><td>R{price_map.get(p, 0.0) * q:.2f}</td></tr>" for p, q in active_items)
-    rows_text = "\n".join(f"  {q}x {p} @ R{price_map.get(p, 0.0):.2f} = R{price_map.get(p, 0.0) * q:.2f}" for p, q in active_items)
+    rows_html = "".join(f"<tr><td>{e(p)}</td><td>{q}</td><td>R{price_map_buz.get(p, 0.0):.2f}</td><td>R{price_map_buz.get(p, 0.0) * q:.2f}</td></tr>" for p, q in active_items)
+    rows_text = "\n".join(f"  {q}x {p} @ R{price_map_buz.get(p, 0.0):.2f} = R{price_map_buz.get(p, 0.0) * q:.2f}" for p, q in active_items)
     bank_qrs = []
     pay_list = payment_lines(inv_no, grand_total)
     pay_html = "<br>".join(html.escape(l) for l in pay_list)
@@ -397,26 +412,28 @@ with st.sidebar:
     else:
         for prod, qty in active_items:
             st.markdown(f"<span style='color:#F8FAFC; font-size:0.9rem;'>- {qty}x {prod}</span>", unsafe_allow_html=True)
-        _, _, _total = basket_totals()
+        _, _, _total = basket_totals_buz()
         st.markdown(f"<span style='color:#34D399; font-size:0.85rem; font-weight:700;'>Total: R{_total:.2f}</span>", unsafe_allow_html=True)
 
     if st.button("CLEAR BASKET"):
-        clear_basket()
+        clear_basket_buz()
         st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
     if st.button("TERMINATE"):
         st.session_state.authenticated = False
         st.session_state.messages = []
-        clear_basket()
+        clear_basket_buz()
         st.session_state.last_document = None
         st.rerun()
 
 
 # ================= MAIN APP HEADER =================
 st.markdown("""
-    <h1 class="main-title">Seed. Intelligence. Harvest.</h1>
-    <div class="sub-title">Precision Agricultural Operations Suite</div>
+<div class="cinematic-hero">
+    <h1>Seed. Intelligence. Harvest.</h1>
+    <p>Precision Agricultural Operations Suite</p>
+</div>
 """, unsafe_allow_html=True)
 
 FEATURES = [
@@ -469,7 +486,7 @@ elif page_selection == "CHAT":
     st.markdown("<div class='section-header'>STRATEGIC AGENT</div>", unsafe_allow_html=True)
 
     # ACCESSIBILITY: JS Hook to programmatically open the hidden sidebar menu for easier navigation
-    if st.button("⬅️ Open Menu Navigation"):
+    if st.button("Open Menu Navigation"):
         components.html("""
             <script>
             const toggle = window.parent.document.querySelector('[data-testid="collapsedControl"]');
@@ -482,10 +499,10 @@ elif page_selection == "CHAT":
     <div class="chat-quick-guide">
         <div style="font-family:'Playfair Display', serif; font-weight: 700; font-size: 1.1rem; color: #34D399; margin-bottom: 12px; letter-spacing: 1px;">QUICK START GUIDE</div>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <div class="guide-item">🌱 <b>Product Expert</b>: Ask about crop treatments & dosages</div>
-            <div class="guide-item">🛒 <b>Basket Aware</b>: I know what you've added to your cart</div>
-            <div class="guide-item">🧾 <b>Instant Billing</b>: Ask me to prepare an invoice or quote</div>
-            <div class="guide-item">🇿🇦 <b>Local Slang</b>: I understand SA farming terminology</div>
+            <div class="guide-item"><b>Product Expert</b>: Ask about crop treatments & dosages</div>
+            <div class="guide-item"><b>Basket Aware</b>: I know what you've added to your cart</div>
+            <div class="guide-item"><b>Instant Billing</b>: Ask me to prepare an invoice or quote</div>
+            <div class="guide-item"><b>Local Slang</b>: I understand SA farming terminology</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -501,11 +518,11 @@ elif page_selection == "CHAT":
     - Email: {st.session_state.user_data['email']}
 
     CLIENT'S CURRENT BASKET (live, you CAN see this):
-    {basket_context()}
+    {basket_context_buz()}
 
     INSTRUCTIONS:
     1. Ground your advice in the certified product catalog:
-    {catalog_context}
+    {catalog_context_buz}
     2. Never ask for their name or address again. Use their profile context automatically.
     3. You can see the basket above. When the client says "from my basket" or "the basket", use those items and totals.
     4. You cannot send emails or generate files yourself. When the client wants an invoice or a QR code quotation, confirm the basket contents and total, then tell them a button will appear below the chat to prepare the document.
@@ -556,7 +573,7 @@ elif page_selection == "CHAT":
     if _chat_items and any(w in _recent for w in _billing_words):
         st.markdown("---")
         st.markdown("<div class='section-header'>SEND DOCUMENT FROM BASKET</div>", unsafe_allow_html=True)
-        _, _, _gt = basket_totals()
+        _, _, _gt = basket_totals_buz()
         st.caption(f"Basket total incl. VAT: R{_gt:.2f}. It will be addressed to {st.session_state.user_data['email']}.")
         chat_doc_type = st.radio("Document type", ["Official Invoice", "QR Code Quotation Summary"], horizontal=True, key="chat_doc_type")
         chat_phone = st.text_input("Contact number (optional)", key="chat_phone")
@@ -567,10 +584,10 @@ elif page_selection == "CHAT":
 
 elif page_selection == "CATALOGUE":
     st.markdown("<div class='section-header'>PRODUCT CATALOGUE</div>", unsafe_allow_html=True)
-    st.caption("Browse our professional agricultural formulations. Optimized for instant load and clarity.")
+    st.caption("Browse our professional agricultural formulations. Rendered instantly with clean, modern glassmorphism.")
 
     cols_grid = st.columns(3)
-    for index, row in enumerate(catalog_data):
+    for index, row in enumerate(catalog_data_buz):
         p_name, p_cat, p_stock, p_price, p_guide = row[0], row[1], row[2], row[3], row[4]
         
         with cols_grid[index % 3]:
@@ -589,7 +606,7 @@ elif page_selection == "CATALOGUE":
                 st.session_state[key] = int(st.session_state.basket.get(p_name, 0))
             st.number_input(
                 f"Qty ({p_name})", min_value=0, max_value=int(p_stock), step=1,
-                key=key, on_change=set_basket_qty, args=(p_name,), label_visibility="collapsed"
+                key=key, on_change=set_basket_qty_buz, args=(p_name,), label_visibility="collapsed"
             )
             st.markdown("<br>", unsafe_allow_html=True)
 
@@ -672,5 +689,6 @@ st.markdown("""
 <div class='footer'>
     <h4>BUZUZI INCORPORATED</h4>
     <p>FOLLOW ON SOCIALS: @SEED2HARVEST_GLOBAL</p>
+    <p style="margin-top: 12px; font-size: 0.8rem; color: #34D399;">Created by Ashley Tinotenda Buzuzi, Software Engineer (CEO)</p>
 </div>
 """, unsafe_allow_html=True)
