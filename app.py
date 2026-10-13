@@ -283,9 +283,14 @@ def get_platform_stats():
         return 0, 0.0, "N/A"
 
 def login_with_receipt(receipt_str):
+    if not receipt_str or not receipt_str.startswith("C"):
+        return None
+        
     try:
         conn_buz = sqlite3.connect("the_farm_agent.db")
         c_buz = conn_buz.cursor()
+        
+        # Format the user's "C" receipt back into the UUID fragment for the SQL lookup
         search_str = receipt_str.replace("C", "").lower() + "%"
         
         c_buz.execute("""
@@ -302,7 +307,7 @@ def login_with_receipt(receipt_str):
             lname = aes_256_decrypt_mock(row_buz[1])
             full_name = f"{fname} {lname}"
             loc = aes_256_decrypt_mock(row_buz[2])
-            email_guess_buz = f"{fname.lower()}{lname.lower()}@farm.co.za"
+            email_guess_buz = f"{fname.replace(' ', '').lower()}@farm.co.za"
             return {"name": full_name, "farm": "Registered Farm", "location": loc, "email": email_guess_buz}
     except Exception:
         pass
@@ -428,7 +433,6 @@ def render_email_status(doc):
     st.caption("Opens a ready-written email to your client. Press send to finish.")
 
 def render_persistent_document(doc_buz, key_prefix):
-    """Handles rendering the generated invoice, receipt banner, and QR codes persistently on both pages."""
     st.markdown(f"""
     <div class="success-receipt">
         <b>TRANSACTION COMPLETE (END OF DEMONSTRATION)</b><br><br>
@@ -720,7 +724,6 @@ elif page_selection_buz == "CHAT":
                     if order_ids_buz:
                         receipt_no_buz = f"C{order_ids_buz[0]}"
                         generate_and_send(chat_doc_type_buz, st.session_state.user_data["location"], chat_phone_buz or "Not provided", st.session_state.user_data["email"], receipt_no_buz)
-                        # Basket deliberately preserved for presentation review
                     else:
                         st.error("Failed to commit transaction to database. Stock may be depleted.")
                         
@@ -800,7 +803,6 @@ elif page_selection_buz == "RESERVE ORDER":
             if order_ids_buz:
                 receipt_no_buz = f"C{order_ids_buz[0]}"
                 generate_and_send(doc_type_buz, location_input_buz, phone_buz, email_input_buz, receipt_no_buz)
-                # Basket deliberately preserved for presentation review
             else:
                 st.error("Failed to commit transaction to database. Stock may be depleted.")
 
