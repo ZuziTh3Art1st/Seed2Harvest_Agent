@@ -28,18 +28,18 @@ st.markdown("""
     }
     
     .stApp { 
-        background-color: #F8FAFC; 
-        color: #0F172A; 
+        background-color: #0F172A; 
+        color: #F8FAFC; 
     }
 
     h1, h2, h3 { 
         font-family: 'Inter', sans-serif; 
         font-weight: 700; 
-        color: #0F172A; 
+        color: #F8FAFC; 
     }
 
     .main-title { 
-        color: #0F172A; 
+        color: #F8FAFC; 
         font-size: 2.25rem; 
         line-height: 1.1; 
         margin-bottom: 2px; 
@@ -48,7 +48,7 @@ st.markdown("""
     }
     
     .sub-title { 
-        color: #059669; 
+        color: #10B981; 
         font-size: 0.85rem; 
         letter-spacing: 2px; 
         font-weight: 600; 
@@ -57,80 +57,86 @@ st.markdown("""
     }
     
     .section-header { 
-        color: #0F172A; 
+        color: #F8FAFC; 
         font-size: 1.25rem; 
         margin-top: 20px; 
         margin-bottom: 12px; 
         font-weight: 600;
-        border-bottom: 2px solid #E2E8F0;
+        border-bottom: 2px solid #334155;
         padding-bottom: 6px;
     }
 
     # Hero banner
     .hero-banner {
         width: 100%; height: 110px; object-fit: cover; object-position: center;
-        border-radius: 12px; border: 1px solid #E2E8F0; display: block; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        border-radius: 12px; border: 1px solid #334155; display: block; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
     }
-    .hero-placeholder { height: 60px; background-color: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; }
+    .hero-placeholder { height: 60px; background-color: #1E293B; border: 1px solid #334155; border-radius: 12px; }
 
-    # Inputs & Fields
+    # Inputs & Fields visibility fix
     .stTextInput > div > div > input, .stNumberInput > div > div > input, .stSelectbox > div > div > div {
-        background-color: #FFFFFF; color: #0F172A; border: 1px solid #CBD5E1; border-radius: 8px;
+        background-color: #1E293B !important; 
+        color: #F8FAFC !important; 
+        border: 1px solid #475569 !important; 
+        border-radius: 8px;
     }
-    .stTextInput > div > div > input:focus { border-color: #059669; box-shadow: 0 0 0 2px rgba(5,150,105,0.1); }
+    .stTextInput > div > div > input:focus { 
+        border-color: #10B981 !important; 
+        box-shadow: 0 0 0 2px rgba(16,185,129,0.2); 
+    }
 
     .custom-warning {
-        background-color: #ECFDF5; color: #065F46; padding: 14px; border-radius: 10px; margin: 12px 0; font-size: 0.9rem; border: 1px solid #A7F3D0;
+        background-color: #064E3B; color: #A7F3D0; padding: 14px; border-radius: 10px; margin: 12px 0; font-size: 0.9rem; border: 1px solid #059669;
     }
 
     # Buttons
     .stButton > button, .stDownloadButton > button, [data-testid="stFormSubmitButton"] > button {
-        background-color: #059669; color: #FFFFFF; border: none; border-radius: 8px; font-weight: 600; letter-spacing: 0.5px;
+        background-color: #10B981; color: #FFFFFF; border: none; border-radius: 8px; font-weight: 600; letter-spacing: 0.5px;
         box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
         transition: all 0.2s ease-in-out;
     }
     .stButton > button:hover, .stDownloadButton > button:hover, [data-testid="stFormSubmitButton"] > button:hover { 
-        background-color: #047857; color: #FFFFFF; box-shadow: 0 4px 6px -1px rgba(5, 150, 105, 0.2);
+        background-color: #059669; color: #FFFFFF; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
     }
 
     # Sidebar Styling
     [data-testid="stSidebar"] { 
-        background-color: #FFFFFF; 
-        border-right: 1px solid #E2E8F0; 
+        background-color: #1E293B; 
+        border-right: 1px solid #334155; 
     }
-    .sidebar-title { color: #0F172A; font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
-    .sidebar-subtitle { color: #64748B; font-size: 0.7rem; letter-spacing: 1px; margin-bottom: 12px; font-weight: 600; }
+    .sidebar-title { color: #F8FAFC; font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+    .sidebar-subtitle { color: #94A3B8; font-size: 0.7rem; letter-spacing: 1px; margin-bottom: 12px; font-weight: 600; }
 
     # Quote & Document Cards
     .quote-box {
-        background-color: #FFFFFF; border: 1px solid #E2E8F0; padding: 24px; border-radius: 12px; font-family: 'Inter', sans-serif; color: #0F172A; margin-top: 15px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+        background-color: #1E293B; border: 1px solid #334155; padding: 24px; border-radius: 12px; font-family: 'Inter', sans-serif; color: #F8FAFC; margin-top: 15px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
     .quote-box table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-    .quote-box th { text-align: left; color: #059669; border-bottom: 2px solid #E2E8F0; padding: 8px; font-size: 0.85rem; }
-    .quote-box td { padding: 8px; border-bottom: 1px solid #F1F5F9; font-size: 0.9rem; }
+    .quote-box th { text-align: left; color: #34D399; border-bottom: 2px solid #334155; padding: 8px; font-size: 0.85rem; }
+    .quote-box td { padding: 8px; border-bottom: 1px solid #334155; font-size: 0.9rem; color: #CBD5E1; }
 
     [data-testid="stForm"] { border: none !important; padding: 0 !important; }
     
     a.mailto-btn {
-        display: inline-block; background-color: #059669; color: #FFFFFF !important; text-decoration: none !important;
+        display: inline-block; background-color: #10B981; color: #FFFFFF !important; text-decoration: none !important;
         padding: 10px 18px; border-radius: 8px; font-weight: 600; letter-spacing: 0.5px; font-size: 0.85rem; margin: 6px 0 12px 0;
         box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     }
-    a.mailto-btn:hover { background-color: #047857; }
+    a.mailto-btn:hover { background-color: #059669; }
 
     # Feature Cards
     .feature-card {
-        background-color: #FFFFFF; border: 1px solid #E2E8F0; border-left: 4px solid #059669;
+        background-color: #1E293B; border: 1px solid #334155; border-left: 4px solid #10B981;
         padding: 18px; border-radius: 10px; margin-bottom: 14px; min-height: 130px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
-    .feature-card h4 { color: #0F172A; margin: 0 0 6px 0; font-size: 1rem; font-weight: 600; }
-    .feature-card p { color: #475569; margin: 0; font-size: 0.88rem; line-height: 1.5; }
+    .feature-card h4 { color: #F8FAFC; margin: 0 0 6px 0; font-size: 1rem; font-weight: 600; }
+    .feature-card p { color: #94A3B8; margin: 0; font-size: 0.88rem; line-height: 1.5; }
 
-    .footer { text-align: center; margin-top: 40px; padding-top: 15px; border-top: 1px solid #E2E8F0; }
-    .footer h4 { color: #0F172A; margin: 0; font-size: 0.9rem; letter-spacing: 1px; font-weight: 600;}
-    .footer p { color: #64748B; font-size: 0.7rem; letter-spacing: 1px; margin-top: 4px;}
+    .footer { text-align: center; margin-top: 40px; padding-top: 15px; border-top: 1px solid #334155; }
+    .footer h4 { color: #F8FAFC; margin: 0; font-size: 0.9rem; letter-spacing: 1px; font-weight: 600;}
+    .footer p { color: #94A3B8; font-size: 0.7rem; letter-spacing: 1px; margin-top: 4px;}
 </style>
 """, unsafe_allow_html=True)
 
