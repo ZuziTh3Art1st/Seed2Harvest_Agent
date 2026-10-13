@@ -5,6 +5,7 @@ import base64
 from urllib.parse import quote
 import requests
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import qrcode
 from io import BytesIO
@@ -183,27 +184,6 @@ st.markdown(f"""
         background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
     }}
 
-    /* HTML Nav Toggle Button */
-    .nav-toggle-btn {{
-        background: rgba(15, 23, 42, 0.65);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255,255,255,0.2);
-        color: #FFFFFF;
-        padding: 10px 22px;
-        border-radius: 12px;
-        font-weight: 700;
-        font-size: 0.9rem;
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-        margin-bottom: 25px;
-    }}
-    .nav-toggle-btn:hover {{
-        background: rgba(16, 185, 129, 0.4);
-        border-color: #34D399;
-    }}
-
     /* Immersive Chat Messages */
     [data-testid="stChatMessage"] {{
         background-color: rgba(15, 23, 42, 0.6) !important;
@@ -233,7 +213,7 @@ st.markdown(f"""
         background-color: transparent !important;
     }}
     
-    /* Chat Quick Guide & Status Boards */
+    /* Chat Quick Guide & Glass Panels */
     .glass-panel {{
         background: rgba(15, 23, 42, 0.55);
         backdrop-filter: blur(16px);
@@ -470,8 +450,8 @@ def render_features():
         with cols[i % 2]:
             st.markdown(f"<div class='glass-card'><h4>{title}</h4><p>{desc}</p></div>", unsafe_allow_html=True)
 
-# VIEWS
 
+# VIEWS
 if not st.session_state.authenticated:
     st.markdown("<div class='section-header'>CLIENT ONBOARDING</div>", unsafe_allow_html=True)
 
@@ -504,12 +484,39 @@ if not st.session_state.authenticated:
                 st.rerun()
 
 elif page_selection == "CHAT":
-    # HTML Nav Button (No Python reruns, pure frontend toggle)
-    st.markdown("""
-        <button class="nav-toggle-btn" onclick="window.parent.document.querySelector('[data-testid=\\'collapsedControl\\']').click()">
-            TOGGLE NAVIGATION MENU
-        </button>
-    """, unsafe_allow_html=True)
+    # HTML Nav Button injected via components (Pure client-side toggle without reload)
+    components.html("""
+    <style>
+        .nav-toggle-btn {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: #FFFFFF;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+            border: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .nav-toggle-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(16, 185, 129, 0.45);
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        }
+        body { margin: 0; padding: 0; background: transparent; }
+    </style>
+    <button class="nav-toggle-btn" onclick="
+        let btn = window.parent.document.querySelector(`[data-testid='stSidebarCollapsedControl']`) || 
+                  window.parent.document.querySelector(`[data-testid='collapsedControl']`);
+        if(btn) btn.click();
+    ">
+        OPEN MENU NAVIGATION
+    </button>
+    """, height=50)
 
     st.markdown("<div class='section-header'>STRATEGIC AGENT</div>", unsafe_allow_html=True)
 
@@ -518,7 +525,7 @@ elif page_selection == "CHAT":
     <div style="display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap;">
         <div class="glass-panel" style="flex: 1; text-align: center; margin-bottom: 0;">
             <div style="font-size: 0.8rem; color: #94A3B8; text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Current Temp</div>
-            <div style="font-size: 2rem; font-weight: 800; color: #34D399; font-family: 'Playfair Display', serif;">24°C</div>
+            <div style="font-size: 2rem; font-weight: 800; color: #34D399; font-family: 'Playfair Display', serif;">24 C</div>
         </div>
         <div class="glass-panel" style="flex: 1; text-align: center; margin-bottom: 0;">
             <div style="font-size: 0.8rem; color: #94A3B8; text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Soil Moisture</div>
@@ -540,15 +547,14 @@ elif page_selection == "CHAT":
     <div class="chat-quick-guide">
         <div style="font-family:'Playfair Display', serif; font-weight: 700; font-size: 1.1rem; color: #34D399; margin-bottom: 12px; letter-spacing: 1px;">QUICK START GUIDE</div>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <div class="guide-item"><b>Product Expert</b>: Ask about crop treatments & dosages</div>
-            <div class="guide-item"><b>Basket Aware</b>: I know what you've added to your cart</div>
+            <div class="guide-item"><b>Product Expert</b>: Ask about crop treatments and dosages</div>
+            <div class="guide-item"><b>Basket Aware</b>: I know what you have added to your cart</div>
             <div class="guide-item"><b>Instant Billing</b>: Ask me to prepare an invoice or quote</div>
             <div class="guide-item"><b>Local Slang</b>: I understand SA farming terminology</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # IRONCLAD PROMPT INSTRUCTIONS
     USER_IDENTITY_PROMPT = f"""
     You are the Seed 2 Harvest Strategic Agent.
     SMME Partner: Shaun Cairns (Cape Town, South Africa).
@@ -565,7 +571,7 @@ elif page_selection == "CHAT":
     CRITICAL INSTRUCTIONS:
     1. Ground your advice in the certified product catalog:
     {catalog_context_buz}
-    2. YOU ALREADY KNOW THE CLIENT'S NAME, FARM, LOCATION, AND EMAIL. DO NOT, UNDER ANY CIRCUMSTANCES, ASK FOR THIS INFORMATION AGAIN. If processing an order, simply confirm you have their details on file.
+    2. YOU ALREADY KNOW THE CLIENT'S NAME, FARM, LOCATION, AND EMAIL. DO NOT, UNDER ANY CIRCUMSTANCES, ASK FOR THIS INFORMATION AGAIN. If processing an order, simply confirm you have their details on file. Do not invent missing parameters.
     3. You can see the basket above. When the client says "from my basket" or "the basket", use those items and totals.
     4. You cannot send emails or generate files yourself. When the client wants an invoice or a QR code quotation, confirm the basket contents and total, then tell them a button will appear below the chat to prepare the document.
     5. Keep responses professional, clear, and actionable. Do not use emojis.
@@ -713,28 +719,6 @@ elif page_selection == "GLOBAL FEED":
     </div>
     """, unsafe_allow_html=True)
 
-    # Real-Time Agronomic Conditions Dashboard
-    st.markdown("""
-    <div style="display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap;">
-        <div class="glass-panel" style="flex: 1; text-align: center; margin-bottom: 0;">
-            <div style="font-size: 0.8rem; color: #94A3B8; text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Current Temp</div>
-            <div style="font-size: 2rem; font-weight: 800; color: #34D399; font-family: 'Playfair Display', serif;">24°C</div>
-        </div>
-        <div class="glass-panel" style="flex: 1; text-align: center; margin-bottom: 0;">
-            <div style="font-size: 0.8rem; color: #94A3B8; text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Soil Moisture</div>
-            <div style="font-size: 2rem; font-weight: 800; color: #34D399; font-family: 'Playfair Display', serif;">42%</div>
-        </div>
-        <div class="glass-panel" style="flex: 1; text-align: center; margin-bottom: 0;">
-            <div style="font-size: 0.8rem; color: #94A3B8; text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Soil pH</div>
-            <div style="font-size: 2rem; font-weight: 800; color: #34D399; font-family: 'Playfair Display', serif;">6.8</div>
-        </div>
-        <div class="glass-panel" style="flex: 1; text-align: center; margin-bottom: 0;">
-            <div style="font-size: 0.8rem; color: #94A3B8; text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Next Rain</div>
-            <div style="font-size: 2rem; font-weight: 800; color: #34D399; font-family: 'Playfair Display', serif;">3 Days</div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
     col_map, col_qr = st.columns([2, 1])
     with col_map:
         st.markdown("### INTERACTIVE FARM MAP")
@@ -744,7 +728,7 @@ elif page_selection == "GLOBAL FEED":
             
         st.write(f"Delivery Location: **{user_loc_buz}**")
 
-        # Full Google Maps iframe integration (No API key needed for basic place embed)
+        # Full Google Maps iframe integration
         encoded_loc_buz = quote(user_loc_buz)
         gmaps_iframe_buz = f"""
         <iframe 
