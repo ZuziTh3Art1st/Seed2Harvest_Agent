@@ -183,20 +183,21 @@ st.markdown(f"""
         background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
     }}
 
-    /* Client-side Nav Button */
+    /* HTML Nav Toggle Button */
     .nav-toggle-btn {{
         background: rgba(15, 23, 42, 0.65);
         backdrop-filter: blur(12px);
         border: 1px solid rgba(255,255,255,0.2);
         color: #FFFFFF;
-        padding: 10px 20px;
+        padding: 10px 22px;
         border-radius: 12px;
         font-weight: 700;
+        font-size: 0.9rem;
         font-family: 'Plus Jakarta Sans', sans-serif;
         cursor: pointer;
         transition: all 0.3s ease;
-        margin-bottom: 20px;
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        margin-bottom: 25px;
     }}
     .nav-toggle-btn:hover {{
         background: rgba(16, 185, 129, 0.4);
@@ -232,9 +233,9 @@ st.markdown(f"""
         background-color: transparent !important;
     }}
     
-    /* Chat Quick Guide */
-    .chat-quick-guide {{
-        background: rgba(15, 23, 42, 0.45);
+    /* Chat Quick Guide & Status Boards */
+    .glass-panel {{
+        background: rgba(15, 23, 42, 0.55);
         backdrop-filter: blur(16px);
         border: 1px solid rgba(255, 255, 255, 0.15);
         border-radius: 16px;
@@ -503,13 +504,35 @@ if not st.session_state.authenticated:
                 st.rerun()
 
 elif page_selection == "CHAT":
-    st.markdown("<div class='section-header'>STRATEGIC AGENT</div>", unsafe_allow_html=True)
-
-    # ACCESSIBILITY: JS Hook to programmatically open the hidden sidebar menu for easier navigation without reloading
+    # HTML Nav Button (No Python reruns, pure frontend toggle)
     st.markdown("""
         <button class="nav-toggle-btn" onclick="window.parent.document.querySelector('[data-testid=\\'collapsedControl\\']').click()">
-            Open Menu Navigation
+            TOGGLE NAVIGATION MENU
         </button>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<div class='section-header'>STRATEGIC AGENT</div>", unsafe_allow_html=True)
+
+    # AGRONOMIC CONDITIONS WIDGET ON CHAT PAGE
+    st.markdown("""
+    <div style="display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap;">
+        <div class="glass-panel" style="flex: 1; text-align: center; margin-bottom: 0;">
+            <div style="font-size: 0.8rem; color: #94A3B8; text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Current Temp</div>
+            <div style="font-size: 2rem; font-weight: 800; color: #34D399; font-family: 'Playfair Display', serif;">24°C</div>
+        </div>
+        <div class="glass-panel" style="flex: 1; text-align: center; margin-bottom: 0;">
+            <div style="font-size: 0.8rem; color: #94A3B8; text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Soil Moisture</div>
+            <div style="font-size: 2rem; font-weight: 800; color: #34D399; font-family: 'Playfair Display', serif;">42%</div>
+        </div>
+        <div class="glass-panel" style="flex: 1; text-align: center; margin-bottom: 0;">
+            <div style="font-size: 0.8rem; color: #94A3B8; text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Soil pH</div>
+            <div style="font-size: 2rem; font-weight: 800; color: #34D399; font-family: 'Playfair Display', serif;">6.8</div>
+        </div>
+        <div class="glass-panel" style="flex: 1; text-align: center; margin-bottom: 0;">
+            <div style="font-size: 0.8rem; color: #94A3B8; text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Next Rain</div>
+            <div style="font-size: 2rem; font-weight: 800; color: #34D399; font-family: 'Playfair Display', serif;">3 Days</div>
+        </div>
+    </div>
     """, unsafe_allow_html=True)
 
     # QUICK GUIDE (No Emojis)
@@ -525,17 +548,18 @@ elif page_selection == "CHAT":
     </div>
     """, unsafe_allow_html=True)
 
+    # IRONCLAD PROMPT INSTRUCTIONS
     USER_IDENTITY_PROMPT = f"""
     You are the Seed 2 Harvest Strategic Agent.
     SMME Partner: Shaun Cairns (Cape Town, South Africa).
 
-    CURRENT CLIENT PROFILE (Already Authenticated):
+    CURRENT CLIENT PROFILE:
     - Name: {st.session_state.user_data['name']}
     - Farm/Company: {st.session_state.user_data['farm']}
     - Location/Address: {st.session_state.user_data['location']}
     - Email: {st.session_state.user_data['email']}
 
-    CLIENT'S CURRENT BASKET (live, you CAN see this):
+    CLIENT'S CURRENT BASKET:
     {basket_context_buz()}
 
     CRITICAL INSTRUCTIONS:
@@ -675,24 +699,36 @@ elif page_selection == "RESERVE ORDER":
         st.download_button("DOWNLOAD DOCUMENT (HTML)", data=doc["email_html"].encode("utf-8"), file_name=f"{doc['inv_no']}.html", mime="text/html")
 
 elif page_selection == "GLOBAL FEED":
-    st.markdown("<div class='section-header'>GLOBAL FEED & AGRONOMIC CONDITIONS</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-header'>GLOBAL FEED & CONDITIONS</div>", unsafe_allow_html=True)
 
-    # Added Feature: Real-Time Agronomic Conditions Dashboard
+    # Added Feature for Older Farmers: Daily Commodity Prices
+    st.markdown("""
+    <div style="background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(12px); padding: 25px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.15); margin-bottom: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);">
+        <h3 style="color: #34D399; font-family: 'Playfair Display', serif; margin-top:0; font-size: 1.5rem;">DAILY SAFEX COMMODITY PRICES</h3>
+        <p style="color: #94A3B8; font-size: 0.85rem; margin-bottom: 15px;">Simulated spot market closing prices (ZAR/TON)</p>
+        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding: 10px 0;"><span>White Maize</span><b style="color: #F8FAFC;">R 4,250</b></div>
+        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding: 10px 0;"><span>Yellow Maize</span><b style="color: #F8FAFC;">R 4,100</b></div>
+        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding: 10px 0;"><span>Wheat</span><b style="color: #F8FAFC;">R 6,150</b></div>
+        <div style="display: flex; justify-content: space-between; padding: 10px 0 0 0;"><span>Soybeans</span><b style="color: #F8FAFC;">R 8,450</b></div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Real-Time Agronomic Conditions Dashboard
     st.markdown("""
     <div style="display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap;">
-        <div style="flex: 1; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(12px); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.15); text-align: center;">
+        <div class="glass-panel" style="flex: 1; text-align: center; margin-bottom: 0;">
             <div style="font-size: 0.8rem; color: #94A3B8; text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Current Temp</div>
             <div style="font-size: 2rem; font-weight: 800; color: #34D399; font-family: 'Playfair Display', serif;">24°C</div>
         </div>
-        <div style="flex: 1; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(12px); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.15); text-align: center;">
+        <div class="glass-panel" style="flex: 1; text-align: center; margin-bottom: 0;">
             <div style="font-size: 0.8rem; color: #94A3B8; text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Soil Moisture</div>
             <div style="font-size: 2rem; font-weight: 800; color: #34D399; font-family: 'Playfair Display', serif;">42%</div>
         </div>
-        <div style="flex: 1; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(12px); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.15); text-align: center;">
+        <div class="glass-panel" style="flex: 1; text-align: center; margin-bottom: 0;">
             <div style="font-size: 0.8rem; color: #94A3B8; text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Soil pH</div>
             <div style="font-size: 2rem; font-weight: 800; color: #34D399; font-family: 'Playfair Display', serif;">6.8</div>
         </div>
-        <div style="flex: 1; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(12px); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.15); text-align: center;">
+        <div class="glass-panel" style="flex: 1; text-align: center; margin-bottom: 0;">
             <div style="font-size: 0.8rem; color: #94A3B8; text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Next Rain</div>
             <div style="font-size: 2rem; font-weight: 800; color: #34D399; font-family: 'Playfair Display', serif;">3 Days</div>
         </div>
