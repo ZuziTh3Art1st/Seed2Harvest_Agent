@@ -4,6 +4,7 @@ import html
 import base64
 from urllib.parse import quote
 import requests
+import sqlite3
 import streamlit as st
 import streamlit.components.v1 as components
 import pandas as pd
@@ -37,8 +38,8 @@ def get_high_quality_images():
     
     try:
         if os.path.exists("images"):
-            all_files = os.listdir("images")
-            for f in all_files:
+            all_files_buz = os.listdir("images")
+            for f in all_files_buz:
                 if f in premium_allowed_buz:
                     high_quality_list_buz.append(os.path.join("images", f))
     except Exception:
@@ -61,10 +62,10 @@ def get_image_base64(path):
         return path
     try:
         with open(path, "rb") as f:
-            b64 = base64.b64encode(f.read()).decode()
-        ext = path.rsplit(".", 1)[-1].lower()
-        mime = "image/png" if ext == "png" else ("image/webp" if ext == "webp" else "image/jpeg")
-        return f"data:{mime};base64,{b64}"
+            b64_buz = base64.b64encode(f.read()).decode()
+        ext_buz = path.rsplit(".", 1)[-1].lower()
+        mime_buz = "image/png" if ext_buz == "png" else ("image/webp" if ext_buz == "webp" else "image/jpeg")
+        return f"data:{mime_buz};base64,{b64_buz}"
     except Exception:
         return ""
 
@@ -77,7 +78,7 @@ if "messages" not in st.session_state: st.session_state.messages = []
 if "basket" not in st.session_state: st.session_state.basket = {}
 if "last_document" not in st.session_state: st.session_state.last_document = None
 
-current_page = "ONBOARDING" if not st.session_state.authenticated else st.session_state.get("current_page", "CHAT")
+current_page_buz = "ONBOARDING" if not st.session_state.authenticated else st.session_state.get("current_page", "CHAT")
 
 page_bg_mapping_buz = {
     "ONBOARDING": hq_images_buz[0] if len(hq_images_buz) > 0 else hq_images_buz[-1],
@@ -88,7 +89,7 @@ page_bg_mapping_buz = {
     "FEATURES": hq_images_buz[5] if len(hq_images_buz) > 5 else hq_images_buz[0]
 }
 
-bg_path_buz = page_bg_mapping_buz.get(current_page, hq_images_buz[0])
+bg_path_buz = page_bg_mapping_buz.get(current_page_buz, hq_images_buz[0])
 bg_b64_buz = get_image_base64(bg_path_buz)
 
 # DYNAMIC SIDEBAR VISIBILITY: Hide Sidebar Completely on Onboarding
@@ -165,15 +166,15 @@ st.markdown(f"""
     }}
     [data-testid="stSidebar"] > div:first-child {{ background-color: transparent !important; }}
     
-    /* Form Inputs & Regular Fields */
-    .stTextInput input, .stNumberInput input, .stSelectbox div[data-baseweb="select"] {{
+    /* Form Inputs & Chat Box */
+    .stTextInput input, .stNumberInput input, .stSelectbox div[data-baseweb="select"], [data-testid="stChatInput"] {{
         background-color: rgba(15, 23, 42, 0.65) !important; 
         color: #FFFFFF !important; 
         border: 1px solid rgba(255, 255, 255, 0.2) !important; 
         border-radius: 12px !important;
         backdrop-filter: blur(10px) !important;
     }}
-    .stTextInput input:focus {{ 
+    .stTextInput input:focus, [data-testid="stChatInput"]:focus-within {{ 
         border-color: #34D399 !important; 
         box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.3) !important; 
     }}
@@ -207,7 +208,7 @@ st.markdown(f"""
         box-shadow: 0 10px 25px rgba(0,0,0,0.2) !important;
     }}
 
-    /* Bottom Chat Container Glass Effect */
+    /* Bottom Chat Container Glass Effect Overrides White Bar */
     [data-testid="stBottom"] > div {{
         background-color: rgba(10, 15, 25, 0.3) !important;
         backdrop-filter: blur(25px) !important;
@@ -572,12 +573,39 @@ if not st.session_state.authenticated:
 elif page_selection_buz == "CHAT":
     st.markdown("<div class='section-header'>STRATEGIC AGENT</div>", unsafe_allow_html=True)
 
-    # HTML Nav Button
-    st.markdown("""
-        <button class="nav-toggle-btn" onclick="window.parent.document.querySelector('[data-testid=\\'collapsedControl\\']').click()">
-            OPEN MENU NAVIGATION
-        </button>
-    """, unsafe_allow_html=True)
+    # HTML Nav Button (No Python reruns, pure frontend toggle)
+    components.html("""
+    <style>
+        .nav-toggle-btn {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: #FFFFFF;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+            border: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .nav-toggle-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(16, 185, 129, 0.45);
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        }
+        body { margin: 0; padding: 0; background: transparent; }
+    </style>
+    <button class="nav-toggle-btn" onclick="
+        let btn = window.parent.document.querySelector(`[data-testid='stSidebarCollapsedControl']`) || 
+                  window.parent.document.querySelector(`[data-testid='collapsedControl']`);
+        if(btn) btn.click();
+    ">
+        OPEN MENU NAVIGATION
+    </button>
+    """, height=50)
 
     # AGRONOMIC CONDITIONS WIDGET ON CHAT PAGE
     st.markdown("""
@@ -677,6 +705,7 @@ elif page_selection_buz == "CHAT":
     _billing_words_buz = ("invoice", "quote", "quotation", "qr", "email", "bill", "order")
     _recent_buz = " ".join(m["content"].lower() for m in st.session_state.messages[-3:])
     _chat_items_buz = [(p, q) for p, q in st.session_state.basket.items() if q > 0]
+    
     if _chat_items_buz and any(w in _recent_buz for w in _billing_words_buz):
         st.markdown("---")
         st.markdown("<div class='section-header'>SEND DOCUMENT FROM BASKET</div>", unsafe_allow_html=True)
@@ -684,10 +713,24 @@ elif page_selection_buz == "CHAT":
         st.caption(f"Basket total incl. VAT: R{_gt_buz:.2f}. It will be addressed to {st.session_state.user_data['email']}.")
         chat_doc_type_buz = st.radio("Document type", ["Official Invoice", "QR Code Quotation Summary"], horizontal=True, key="chat_doc_type")
         chat_phone_buz = st.text_input("Contact number (optional)", key="chat_phone")
+        
         if st.button(f"PREPARE {chat_doc_type_buz.upper()}", key="chat_send_btn"):
             with st.spinner("Preparing document..."):
                 result_buz = generate_and_send(chat_doc_type_buz, st.session_state.user_data["location"], chat_phone_buz or "Not provided", st.session_state.user_data["email"], "PENDING-DB-SYNC")
             render_email_status(result_buz)
+            
+            # FULL DOCUMENT AND QR PREVIEW IN CHAT
+            st.markdown(result_buz["doc_html"], unsafe_allow_html=True)
+            if result_buz.get("bank_qrs"):
+                st.markdown("<h4 style='color: #34D399; margin-top: 20px; font-family: \"Playfair Display\", serif;'>SCAN TO OPEN YOUR BANK</h4>", unsafe_allow_html=True)
+                qr_cols_buz = st.columns(len(result_buz["bank_qrs"]))
+                for col_buz, (bank_name_buz, bank_url_buz, bank_png_buz) in zip(qr_cols_buz, result_buz["bank_qrs"]):
+                    with col_buz:
+                        st.image(bank_png_buz, width=130)
+                        st.markdown(f"**{bank_name_buz}**  \n[Open site]({bank_url_buz})")
+                st.caption("Banks do not allow a public link that opens a pre-filled payment, so each code opens the bank. Log in, choose Pay, and use the reference and amount shown above.")
+            
+            st.download_button("DOWNLOAD DOCUMENT (HTML)", data=result_buz["email_html"].encode("utf-8"), file_name=f"{result_buz['inv_no']}.html", mime="text/html", key="chat_download_btn")
 
 elif page_selection_buz == "CATALOGUE":
     st.markdown("<div class='section-header'>PRODUCT CATALOGUE</div>", unsafe_allow_html=True)
@@ -770,12 +813,12 @@ elif page_selection_buz == "RESERVE ORDER":
     if doc_buz:
         render_email_status(doc_buz)
         st.markdown(doc_buz["doc_html"], unsafe_allow_html=True)
-        if doc_buz["bank_qrs"]:
-            st.markdown("**SCAN TO OPEN YOUR BANK**")
+        if doc_buz.get("bank_qrs"):
+            st.markdown("<h4 style='color: #34D399; margin-top: 20px; font-family: \"Playfair Display\", serif;'>SCAN TO OPEN YOUR BANK</h4>", unsafe_allow_html=True)
             qr_cols_buz = st.columns(len(doc_buz["bank_qrs"]))
             for col_buz, (bank_name_buz, bank_url_buz, bank_png_buz) in zip(qr_cols_buz, doc_buz["bank_qrs"]):
                 with col_buz:
-                    st.image(bank_png_buz, width=150)
+                    st.image(bank_png_buz, width=130)
                     st.markdown(f"**{bank_name_buz}**  \n[Open site]({bank_url_buz})")
             st.caption("Banks do not allow a public link that opens a pre-filled payment, so each code opens the bank. Log in, choose Pay, and use the reference and amount shown above.")
         st.download_button("DOWNLOAD DOCUMENT (HTML)", data=doc_buz["email_html"].encode("utf-8"), file_name=f"{doc_buz['inv_no']}.html", mime="text/html")
