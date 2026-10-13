@@ -22,34 +22,36 @@ st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
-    # Global Editorial & Atmospheric Design with Clean Light Mode Palette
+    # Global Editorial & Atmospheric Design with Scenic Full-App Background Image
     html, body, [class*="css"] {
         font-family: 'Plus Jakarta Sans', sans-serif;
     }
     
     .stApp { 
-        background: #F8FAFC; 
-        color: #0F172A; 
+        background: linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.85)), url('app/static/banner.jpg');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        color: #F1F5F9; 
     }
 
     h1, h2, h3 { 
         font-family: 'Playfair Display', serif; 
         font-weight: 700; 
-        color: #0F172A; 
+        color: #FFFFFF; 
     }
 
-    # Cinematic Hero Section (Atmospheric Minimalism & Light Mode Editorial)
+    # Cinematic Hero Section (Atmospheric Minimalism & Editorial Dribbble Style)
     .cinematic-hero {
         position: relative;
         border-radius: 28px;
         overflow: hidden;
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(248, 250, 252, 0.95) 100%), url('app/static/banner.jpg');
-        background-size: cover;
-        background-position: center;
+        background: rgba(15, 23, 42, 0.65);
+        backdrop-filter: blur(12px);
         padding: 5rem 3rem;
         margin-bottom: 2.5rem;
-        border: 1px solid #E2E8F0;
-        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
         text-align: center;
     }
     
@@ -58,13 +60,13 @@ st.markdown("""
         font-size: 3.8rem;
         font-weight: 700;
         letter-spacing: -0.02em;
-        color: #0F172A;
+        color: #FFFFFF;
         margin: 0 0 10px 0;
     }
 
     .cinematic-hero p {
         font-family: 'Plus Jakarta Sans', sans-serif;
-        color: #059669;
+        color: #34D399;
         font-size: 1rem;
         letter-spacing: 4px;
         font-weight: 700;
@@ -74,108 +76,101 @@ st.markdown("""
 
     .section-header { 
         font-family: 'Playfair Display', serif;
-        color: #0F172A; 
+        color: #FFFFFF; 
         font-size: 1.8rem; 
         margin-top: 2rem; 
         margin-bottom: 1.2rem; 
         font-weight: 700;
-        border-bottom: 1px solid #E2E8F0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
         padding-bottom: 10px;
     }
 
     # Modern Inputs & Fields
     .stTextInput > div > div > input, .stNumberInput > div > div > input, .stSelectbox > div > div > div {
-        background-color: #FFFFFF !important; 
-        color: #0F172A !important; 
-        border: 1px solid #CBD5E1 !important; 
+        background-color: rgba(30, 41, 59, 0.8) !important; 
+        color: #FFFFFF !important; 
+        border: 1px solid rgba(255, 255, 255, 0.2) !important; 
         border-radius: 14px !important;
         padding: 0.7rem 1.1rem !important;
     }
     .stTextInput > div > div > input:focus { 
-        border-color: #059669 !important; 
-        box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15) !important; 
+        border-color: #34D399 !important; 
+        box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.25) !important; 
     }
 
     .custom-warning {
-        background-color: #ECFDF5; color: #065F46; padding: 18px; border-radius: 16px; margin: 15px 0; font-size: 0.92rem; border: 1px solid #A7F3D0;
+        background-color: rgba(16, 185, 129, 0.15); color: #34D399; padding: 18px; border-radius: 16px; margin: 15px 0; font-size: 0.92rem; border: 1px solid rgba(16, 185, 129, 0.4);
     }
 
     # Action Buttons
     .stButton > button, .stDownloadButton > button, [data-testid="stFormSubmitButton"] > button {
-        background: linear-gradient(135deg, #059669 0%, #047857 100%); 
+        background: linear-gradient(135deg, #10B981 0%, #059669 100%); 
         color: #FFFFFF; 
         border: none; 
         border-radius: 14px; 
         font-weight: 700; 
         padding: 0.7rem 1.5rem;
         letter-spacing: 0.5px;
-        box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .stButton > button:hover, .stDownloadButton > button:hover, [data-testid="stFormSubmitButton"] > button:hover { 
         transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(5, 150, 105, 0.3);
-        background: linear-gradient(135deg, #047857 0%, #065F46 100%);
+        box-shadow: 0 12px 25px rgba(16, 185, 129, 0.45);
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
     }
 
     # Sidebar Modernization
     [data-testid="stSidebar"] { 
-        background-color: #FFFFFF; 
-        border-right: 1px solid #E2E8F0; 
+        background-color: rgba(6, 9, 15, 0.95); 
+        border-right: 1px solid rgba(255, 255, 255, 0.1); 
     }
-    .sidebar-title { color: #0F172A; font-size: 1.15rem; font-weight: 800; margin-bottom: 2px; }
+    .sidebar-title { color: #FFFFFF; font-size: 1.15rem; font-weight: 800; margin-bottom: 2px; }
     .sidebar-subtitle { color: #64748B; font-size: 0.72rem; letter-spacing: 2px; margin-bottom: 15px; font-weight: 700; text-transform: uppercase; }
 
-    # Clean Glassmorphism Cards
+    # Glassmorphism Cards
     .quote-box {
-        background: #FFFFFF; border: 1px solid #E2E8F0; padding: 30px; border-radius: 24px; color: #0F172A; margin-top: 20px;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        background: rgba(30, 41, 59, 0.75); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.12); padding: 30px; border-radius: 24px; color: #FFFFFF; margin-top: 20px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
     }
     .quote-box table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-    .quote-box th { text-align: left; color: #059669; border-bottom: 2px solid #E2E8F0; padding: 12px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; }
-    .quote-box td { padding: 12px; border-bottom: 1px solid #F1F5F9; font-size: 0.92rem; color: #334155; }
+    .quote-box th { text-align: left; color: #34D399; border-bottom: 2px solid rgba(255, 255, 255, 0.15); padding: 12px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; }
+    .quote-box td { padding: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.92rem; color: #CBD5E1; }
 
     [data-testid="stForm"] { border: none !important; padding: 0 !important; background: transparent !important; }
     
     a.mailto-btn {
-        display: inline-block; background: linear-gradient(135deg, #059669 0%, #047857 100%); color: #FFFFFF !important; text-decoration: none !important;
+        display: inline-block; background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: #FFFFFF !important; text-decoration: none !important;
         padding: 12px 24px; border-radius: 14px; font-weight: 700; letter-spacing: 0.5px; font-size: 0.9rem; margin: 8px 0 15px 0;
-        box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
         transition: all 0.2s ease;
     }
-    a.mailto-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(5, 150, 105, 0.3); }
+    a.mailto-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 25px rgba(16, 185, 129, 0.45); }
 
     # Apple-grade Feature Cards
     .feature-card {
-        background: #FFFFFF; border: 1px solid #E2E8F0; border-top: 3px solid #059669;
+        background: rgba(30, 41, 59, 0.65); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-top: 3px solid #34D399;
         padding: 26px; border-radius: 24px; margin-bottom: 18px; height: 100%;
-        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.04);
+        box-shadow: 0 15px 35px -10px rgba(0,0,0,0.5);
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease;
     }
     .feature-card:hover {
         transform: translateY(-6px);
-        box-shadow: 0 20px 35px -10px rgba(5, 150, 105, 0.15);
-        border-color: #A7F3D0;
+        box-shadow: 0 25px 50px -12px rgba(16, 185, 129, 0.3);
+        border-color: rgba(52, 211, 153, 0.5);
     }
-    .feature-card h4 { font-family: 'Playfair Display', serif; color: #0F172A; margin: 0 0 10px 0; font-size: 1.25rem; font-weight: 700; }
-    .feature-card p { color: #64748B; margin: 0; font-size: 0.92rem; line-height: 1.6; }
+    .feature-card h4 { font-family: 'Playfair Display', serif; color: #FFFFFF; margin: 0 0 10px 0; font-size: 1.25rem; font-weight: 700; }
+    .feature-card p { color: #94A3B8; margin: 0; font-size: 0.92rem; line-height: 1.6; }
 
-    # 3D Depth Catalogue Showcase Carousel / Grid
-    .catalogue-3d-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 24px;
-        margin-top: 1.5rem;
-        margin-bottom: 2rem;
-    }
-
+    # 3D Depth Catalogue Showcase Cards
     .product-3d-card {
-        background: #FFFFFF;
-        border: 1px solid #E2E8F0;
+        background: rgba(30, 41, 59, 0.75);
+        backdrop-filter: blur(14px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
         border-radius: 24px;
         padding: 2rem 1.5rem;
         text-align: center;
-        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+        box-shadow: 0 20px 40px -15px rgba(0,0,0,0.6);
         transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
         position: relative;
         overflow: hidden;
@@ -185,13 +180,13 @@ st.markdown("""
         content: '';
         position: absolute;
         top: 0; left: 0; right: 0; height: 2px;
-        background: linear-gradient(90deg, transparent, rgba(5, 150, 105, 0.5), transparent);
+        background: linear-gradient(90deg, transparent, rgba(52, 211, 153, 0.6), transparent);
     }
 
     .product-3d-card:hover {
         transform: translateY(-8px) scale(1.02);
-        box-shadow: 0 20px 35px -10px rgba(5, 150, 105, 0.2);
-        border-color: #A7F3D0;
+        box-shadow: 0 30px 60px -15px rgba(16, 185, 129, 0.3);
+        border-color: rgba(52, 211, 153, 0.5);
     }
 
     .product-image-container {
@@ -201,12 +196,12 @@ st.markdown("""
         background-position: center;
         border-radius: 16px;
         margin-bottom: 1.2rem;
-        box-shadow: 0 8px 16px rgba(0,0,0,0.08);
-        border: 1px solid #E2E8F0;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+        border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    .footer { text-align: center; margin-top: 80px; padding: 30px 0; border-top: 1px solid #E2E8F0; background: #FFFFFF; border-radius: 28px 28px 0 0; }
-    .footer h4 { font-family: 'Playfair Display', serif; color: #0F172A; margin: 0; font-size: 1.1rem; letter-spacing: 1px; font-weight: 700;}
+    .footer { text-align: center; margin-top: 80px; padding: 30px 0; border-top: 1px solid rgba(255, 255, 255, 0.1); background: rgba(4, 6, 11, 0.95); border-radius: 28px 28px 0 0; }
+    .footer h4 { font-family: 'Playfair Display', serif; color: #FFFFFF; margin: 0; font-size: 1.1rem; letter-spacing: 1px; font-weight: 700;}
     .footer p { color: #64748B; font-size: 0.75rem; letter-spacing: 2px; margin-top: 8px; font-weight: 700;}
 </style>
 """, unsafe_allow_html=True)
@@ -513,7 +508,7 @@ with st.sidebar:
         st.session_state.last_document = None
         st.rerun()
 
-# CINEMATIC EDITORIAL LIGHT MODE HERO HEADER WITH SCENIC BACKGROUND IMAGES
+# CINEMATIC EDITORIAL HERO HEADER WITH FULL SCENIC BACKGROUND IMAGE
 st.markdown("""
 <div class="cinematic-hero">
     <h1>Seed. Intelligence. Harvest.</h1>
@@ -672,7 +667,7 @@ elif page_selection == "CHAT":
 
 elif page_selection == "CATALOGUE":
     st.markdown("<div class='section-header'>PRODUCT CATALOGUE & 3D SHOWCASE</div>", unsafe_allow_html=True)
-    st.caption("Explore our professional agricultural formulations presented in an immersive 3D-depth light mode card interface.")
+    st.caption("Explore our professional agricultural formulations presented in an immersive 3D-depth card interface over scenic landscape backdrops.")
 
     image_filenames = []
     try:
@@ -687,17 +682,17 @@ elif page_selection == "CATALOGUE":
         
         bg_img = image_filenames[index % len(image_filenames)] if image_filenames else "images/maxresdefault.jpg"
         img_b64 = get_image_base64(bg_img)
-        bg_style = f"background-image: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(15,23,42,0.7) 100%), url('{img_b64}');" if img_b64 else "background-color: #E2E8F0;"
+        bg_style = f"background-image: linear-gradient(180deg, rgba(15,23,42,0.2) 0%, rgba(15,23,42,0.85) 100%), url('{img_b64}');" if img_b64 else "background-color: #1E293B;"
 
         with cols_grid[index % 3]:
             st.markdown(f"""
             <div class="product-3d-card">
                 <div class="product-image-container" style="{bg_style}"></div>
-                <span style="background: #ECFDF5; color: #059669; padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;">{p_cat}</span>
-                <h3 style="font-family: 'Playfair Display', serif; margin: 12px 0 6px 0; font-size: 1.25rem; color: #0F172A;">{p_name}</h3>
-                <p style="color: #64748B; font-size: 0.82rem; margin-bottom: 12px; line-height: 1.4;"><b>Guideline:</b> {p_guide}</p>
-                <div style="font-size: 1.3rem; font-weight: 800; color: #059669; margin-bottom: 4px;">ZAR {p_price:.2f}</div>
-                <div style="font-size: 0.75rem; color: #94A3B8; margin-bottom: 15px;">Stock: {p_stock} available</div>
+                <span style="background: rgba(52, 211, 153, 0.2); color: #34D399; padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;">{p_cat}</span>
+                <h3 style="font-family: 'Playfair Display', serif; margin: 12px 0 6px 0; font-size: 1.25rem; color: #FFFFFF;">{p_name}</h3>
+                <p style="color: #94A3B8; font-size: 0.82rem; margin-bottom: 12px; line-height: 1.4;"><b>Guideline:</b> {p_guide}</p>
+                <div style="font-size: 1.3rem; font-weight: 800; color: #34D399; margin-bottom: 4px;">ZAR {p_price:.2f}</div>
+                <div style="font-size: 0.75rem; color: #64748B; margin-bottom: 15px;">Stock: {p_stock} available</div>
             </div>
             """, unsafe_allow_html=True)
 
