@@ -22,17 +22,17 @@ st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
-    # Global Editorial & Atmospheric Design with Scenic Full-App Background Image
+    # Global Editorial & Atmospheric Design
     html, body, [class*="css"] {
         font-family: 'Plus Jakarta Sans', sans-serif;
     }
     
     .stApp { 
-        background: linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.85)), url('app/static/banner.jpg');
+        background: linear-gradient(rgba(10, 15, 25, 0.45), rgba(10, 15, 25, 0.65)), url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2032&auto=format&fit=crop');
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
-        color: #F1F5F9; 
+        color: #F8FAFC; 
     }
 
     h1, h2, h3 { 
@@ -41,17 +41,17 @@ st.markdown("""
         color: #FFFFFF; 
     }
 
-    # Cinematic Hero Section (Atmospheric Minimalism & Editorial Dribbble Style)
+    # Cinematic Hero Section with Rich Scenic Background Overlay
     .cinematic-hero {
         position: relative;
         border-radius: 28px;
         overflow: hidden;
-        background: rgba(15, 23, 42, 0.65);
-        backdrop-filter: blur(12px);
+        background: rgba(15, 23, 42, 0.55);
+        backdrop-filter: blur(14px);
         padding: 5rem 3rem;
         margin-bottom: 2.5rem;
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
         text-align: center;
     }
     
@@ -81,25 +81,25 @@ st.markdown("""
         margin-top: 2rem; 
         margin-bottom: 1.2rem; 
         font-weight: 700;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         padding-bottom: 10px;
     }
 
     # Modern Inputs & Fields
     .stTextInput > div > div > input, .stNumberInput > div > div > input, .stSelectbox > div > div > div {
-        background-color: rgba(30, 41, 59, 0.8) !important; 
+        background-color: rgba(30, 41, 59, 0.85) !important; 
         color: #FFFFFF !important; 
-        border: 1px solid rgba(255, 255, 255, 0.2) !important; 
+        border: 1px solid rgba(255, 255, 255, 0.25) !important; 
         border-radius: 14px !important;
         padding: 0.7rem 1.1rem !important;
     }
     .stTextInput > div > div > input:focus { 
         border-color: #34D399 !important; 
-        box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.25) !important; 
+        box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.3) !important; 
     }
 
     .custom-warning {
-        background-color: rgba(16, 185, 129, 0.15); color: #34D399; padding: 18px; border-radius: 16px; margin: 15px 0; font-size: 0.92rem; border: 1px solid rgba(16, 185, 129, 0.4);
+        background-color: rgba(16, 185, 129, 0.2); color: #34D399; padding: 18px; border-radius: 16px; margin: 15px 0; font-size: 0.92rem; border: 1px solid rgba(16, 185, 129, 0.5);
     }
 
     # Action Buttons
@@ -123,19 +123,19 @@ st.markdown("""
     # Sidebar Modernization
     [data-testid="stSidebar"] { 
         background-color: rgba(6, 9, 15, 0.95); 
-        border-right: 1px solid rgba(255, 255, 255, 0.1); 
+        border-right: 1px solid rgba(255, 255, 255, 0.15); 
     }
     .sidebar-title { color: #FFFFFF; font-size: 1.15rem; font-weight: 800; margin-bottom: 2px; }
-    .sidebar-subtitle { color: #64748B; font-size: 0.72rem; letter-spacing: 2px; margin-bottom: 15px; font-weight: 700; text-transform: uppercase; }
+    .sidebar-subtitle { color: #94A3B8; font-size: 0.72rem; letter-spacing: 2px; margin-bottom: 15px; font-weight: 700; text-transform: uppercase; }
 
     # Glassmorphism Cards
     .quote-box {
-        background: rgba(30, 41, 59, 0.75); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.12); padding: 30px; border-radius: 24px; color: #FFFFFF; margin-top: 20px;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.15); padding: 30px; border-radius: 24px; color: #FFFFFF; margin-top: 20px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
     }
     .quote-box table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-    .quote-box th { text-align: left; color: #34D399; border-bottom: 2px solid rgba(255, 255, 255, 0.15); padding: 12px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; }
-    .quote-box td { padding: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); font-size: 0.92rem; color: #CBD5E1; }
+    .quote-box th { text-align: left; color: #34D399; border-bottom: 2px solid rgba(255, 255, 255, 0.2); padding: 12px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; }
+    .quote-box td { padding: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); font-size: 0.92rem; color: #E2E8F0; }
 
     [data-testid="stForm"] { border: none !important; padding: 0 !important; background: transparent !important; }
     
@@ -149,24 +149,24 @@ st.markdown("""
 
     # Apple-grade Feature Cards
     .feature-card {
-        background: rgba(30, 41, 59, 0.65); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-top: 3px solid #34D399;
+        background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.15); border-top: 3px solid #34D399;
         padding: 26px; border-radius: 24px; margin-bottom: 18px; height: 100%;
-        box-shadow: 0 15px 35px -10px rgba(0,0,0,0.5);
+        box-shadow: 0 15px 35px -10px rgba(0,0,0,0.4);
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease;
     }
     .feature-card:hover {
         transform: translateY(-6px);
-        box-shadow: 0 25px 50px -12px rgba(16, 185, 129, 0.3);
-        border-color: rgba(52, 211, 153, 0.5);
+        box-shadow: 0 25px 50px -12px rgba(16, 185, 129, 0.35);
+        border-color: rgba(52, 211, 153, 0.6);
     }
     .feature-card h4 { font-family: 'Playfair Display', serif; color: #FFFFFF; margin: 0 0 10px 0; font-size: 1.25rem; font-weight: 700; }
-    .feature-card p { color: #94A3B8; margin: 0; font-size: 0.92rem; line-height: 1.6; }
+    .feature-card p { color: #CBD5E1; margin: 0; font-size: 0.92rem; line-height: 1.6; }
 
     # 3D Depth Catalogue Showcase Cards
     .product-3d-card {
-        background: rgba(30, 41, 59, 0.75);
-        backdrop-filter: blur(14px);
-        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(30, 41, 59, 0.8);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
         border-radius: 24px;
         padding: 2rem 1.5rem;
         text-align: center;
@@ -180,13 +180,13 @@ st.markdown("""
         content: '';
         position: absolute;
         top: 0; left: 0; right: 0; height: 2px;
-        background: linear-gradient(90deg, transparent, rgba(52, 211, 153, 0.6), transparent);
+        background: linear-gradient(90deg, transparent, rgba(52, 211, 153, 0.7), transparent);
     }
 
     .product-3d-card:hover {
         transform: translateY(-8px) scale(1.02);
-        box-shadow: 0 30px 60px -15px rgba(16, 185, 129, 0.3);
-        border-color: rgba(52, 211, 153, 0.5);
+        box-shadow: 0 30px 60px -15px rgba(16, 185, 129, 0.35);
+        border-color: rgba(52, 211, 153, 0.6);
     }
 
     .product-image-container {
@@ -197,12 +197,12 @@ st.markdown("""
         border-radius: 16px;
         margin-bottom: 1.2rem;
         box-shadow: 0 10px 20px rgba(0,0,0,0.4);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.15);
     }
 
-    .footer { text-align: center; margin-top: 80px; padding: 30px 0; border-top: 1px solid rgba(255, 255, 255, 0.1); background: rgba(4, 6, 11, 0.95); border-radius: 28px 28px 0 0; }
+    .footer { text-align: center; margin-top: 80px; padding: 30px 0; border-top: 1px solid rgba(255, 255, 255, 0.15); background: rgba(4, 6, 11, 0.95); border-radius: 28px 28px 0 0; }
     .footer h4 { font-family: 'Playfair Display', serif; color: #FFFFFF; margin: 0; font-size: 1.1rem; letter-spacing: 1px; font-weight: 700;}
-    .footer p { color: #64748B; font-size: 0.75rem; letter-spacing: 2px; margin-top: 8px; font-weight: 700;}
+    .footer p { color: #94A3B8; font-size: 0.75rem; letter-spacing: 2px; margin-top: 8px; font-weight: 700;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -508,7 +508,7 @@ with st.sidebar:
         st.session_state.last_document = None
         st.rerun()
 
-# CINEMATIC EDITORIAL HERO HEADER WITH FULL SCENIC BACKGROUND IMAGE
+# CINEMATIC EDITORIAL HERO HEADER WITH RICH SCENIC BACKGROUND IMAGE
 st.markdown("""
 <div class="cinematic-hero">
     <h1>Seed. Intelligence. Harvest.</h1>
@@ -667,7 +667,7 @@ elif page_selection == "CHAT":
 
 elif page_selection == "CATALOGUE":
     st.markdown("<div class='section-header'>PRODUCT CATALOGUE & 3D SHOWCASE</div>", unsafe_allow_html=True)
-    st.caption("Explore our professional agricultural formulations presented in an immersive 3D-depth card interface over scenic landscape backdrops.")
+    st.caption("Explore our professional agricultural formulations presented in an immersive 3D-depth card interface over rich scenic landscape photography.")
 
     image_filenames = []
     try:
@@ -690,9 +690,9 @@ elif page_selection == "CATALOGUE":
                 <div class="product-image-container" style="{bg_style}"></div>
                 <span style="background: rgba(52, 211, 153, 0.2); color: #34D399; padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;">{p_cat}</span>
                 <h3 style="font-family: 'Playfair Display', serif; margin: 12px 0 6px 0; font-size: 1.25rem; color: #FFFFFF;">{p_name}</h3>
-                <p style="color: #94A3B8; font-size: 0.82rem; margin-bottom: 12px; line-height: 1.4;"><b>Guideline:</b> {p_guide}</p>
+                <p style="color: #CBD5E1; font-size: 0.82rem; margin-bottom: 12px; line-height: 1.4;"><b>Guideline:</b> {p_guide}</p>
                 <div style="font-size: 1.3rem; font-weight: 800; color: #34D399; margin-bottom: 4px;">ZAR {p_price:.2f}</div>
-                <div style="font-size: 0.75rem; color: #64748B; margin-bottom: 15px;">Stock: {p_stock} available</div>
+                <div style="font-size: 0.75rem; color: #94A3B8; margin-bottom: 15px;">Stock: {p_stock} available</div>
             </div>
             """, unsafe_allow_html=True)
 
@@ -792,7 +792,7 @@ elif page_selection == "GLOBAL FEED":
     """)
 
 elif page_selection == "FEATURES":
-    st.markdown("<div class='section-header'>WHAT THIS APP CAN DO</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-header'>WHAT THIS APP DO</div>", unsafe_allow_html=True)
     render_features()
 
     st.markdown("### HOW TO PLACE AN ORDER")
