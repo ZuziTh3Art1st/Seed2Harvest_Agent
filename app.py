@@ -12,10 +12,11 @@ from groq import Groq
 import The_Database as db
 
 # PAGE CONFIG & STYLING
+# Setting initial_sidebar_state to "collapsed" ensures the sidebar stays out of the way when navigating
 st.set_page_config(
     page_title="Seed 2 Harvest | Cinematic Intelligence",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
 st.markdown("""
@@ -97,6 +98,27 @@ st.markdown("""
 
     .custom-warning {
         background-color: rgba(16, 185, 129, 0.15); color: #34D399; padding: 18px; border-radius: 16px; margin: 15px 0; font-size: 0.92rem; border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+
+    # Chat Quick Guide UI
+    .chat-quick-guide {
+        background: rgba(15, 23, 42, 0.45);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+    .guide-item {
+        font-size: 0.85rem;
+        color: #E2E8F0;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 8px 14px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        display: inline-block;
+        margin-right: 8px;
+        margin-bottom: 8px;
     }
 
     # Action Buttons
@@ -290,6 +312,31 @@ def make_qr_png(data: str, box_size=5) -> bytes:
     return buf.getvalue()
 
 
+# HIGH QUALITY CURATED IMAGE SELECTOR (FILTERING OUT LOW QUALITY ASSETS)
+def get_high_quality_images():
+    high_quality_list = []
+    try:
+        if os.path.exists("images"):
+            all_files = os.listdir("images")
+            for f in all_files:
+                if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp', '.avif')):
+                    # Exclude known lower-quality or unrefined test thumbs
+                    if "67cad4" not in f and "X9" not in f:
+                        high_quality_list.append(os.path.join("images", f))
+    except Exception:
+        pass
+    
+    # Fallback to Unsplash premium high-res photography if local folder lacks pristine assets
+    if not high_quality_list:
+        high_quality_list = [
+            "https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2032&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=2040&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1511497584788-876761142212?q=80&w=2032&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=2070&auto=format&fit=crop"
+        ]
+    return high_quality_list
+
+
 def get_image_base64(path):
     if path.startswith("http"):
         return path
@@ -303,14 +350,16 @@ def get_image_base64(path):
         return ""
 
 
-# UNIQUE HIGH QUALITY IMAGE MAPPING PER PAGE
+hq_images = get_high_quality_images()
+
+# DEDICATED HIGH-QUALITY BACKGROUND IMAGE ASSIGNMENT PER PAGE
 page_bg_mapping = {
-    "ONBOARDING": "images/pexels-tatianasyrikova-3934023.jpg",
-    "CHAT": "images/v2osk-1Z2niiBPg5A-unsplash.jpg",
-    "CATALOGUE": "images/pexels-arndt-peter-bergfeld-151632051-39888320.jpg",
-    "RESERVE ORDER": "images/pietro-de-grandi-T7K4aEPoGGk-unsplash.jpg",
-    "GLOBAL FEED": "images/pexels-richard-pan-5305182-12643137.jpg",
-    "FEATURES": "images/mark-harpur-K2s_YE031CA-unsplash.jpg"
+    "ONBOARDING": hq_images[0] if len(hq_images) > 0 else "images/maxresdefault.jpg",
+    "CHAT": hq_images[1] if len(hq_images) > 1 else hq_images[0],
+    "CATALOGUE": hq_images[2] if len(hq_images) > 2 else hq_images[0],
+    "RESERVE ORDER": hq_images[3] if len(hq_images) > 3 else hq_images[0],
+    "GLOBAL FEED": hq_images[4] if len(hq_images) > 4 else hq_images[0],
+    "FEATURES": hq_images[5] if len(hq_images) > 5 else hq_images[0]
 }
 
 
@@ -518,7 +567,7 @@ with st.sidebar:
 
 # DYNAMIC HIGH-RES SCENIC BACKGROUND INJECTION PER PAGE
 current_page_key = page_selection if st.session_state.authenticated else "ONBOARDING"
-selected_bg = page_bg_mapping.get(current_page_key, "images/maxresdefault.jpg")
+selected_bg = page_bg_mapping.get(current_page_key, hq_images[0] if hq_images else "images/maxresdefault.jpg")
 resolved_bg_b64 = get_image_base64(selected_bg)
 
 if resolved_bg_b64:
@@ -534,7 +583,7 @@ if resolved_bg_b64:
     """, unsafe_allow_html=True)
 
 
-# CINEMATIC EDITORIAL HERO HEADER 
+# CINEMATIC EDITORIAL HERO HEADER
 st.markdown("""
 <div class="cinematic-hero">
     <h1>Seed. Intelligence. Harvest.</h1>
@@ -606,6 +655,19 @@ if not st.session_state.authenticated:
 
 elif page_selection == "CHAT":
     st.markdown("<div class='section-header'>STRATEGIC AGENT</div>", unsafe_allow_html=True)
+
+    # Chat Quick Guide UI
+    st.markdown("""
+    <div class="chat-quick-guide">
+        <div style="font-weight: 800; font-size: 0.95rem; color: #34D399; margin-bottom: 12px; letter-spacing: 1px;">QUICK START GUIDE</div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <div class="guide-item">🌱 <b>Product Expert</b>: Ask about crop treatments & dosages</div>
+            <div class="guide-item">🛒 <b>Basket Aware</b>: I know what you've added to your cart</div>
+            <div class="guide-item">🧾 <b>Instant Billing</b>: Ask me to prepare an invoice or quote</div>
+            <div class="guide-item">🇿🇦 <b>Local Slang</b>: I understand SA farming terminology</div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
     USER_IDENTITY_PROMPT = f"""
     You are the Seed 2 Harvest Strategic Agent.
