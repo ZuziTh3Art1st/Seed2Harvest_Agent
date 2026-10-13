@@ -20,11 +20,11 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# HELPER TO GET ONLY PREMIUM HIGH QUALITY IMAGES FROM IMAGES FOLDER
+# CACHED HELPER TO GET ONLY PREMIUM HIGH QUALITY IMAGES FROM IMAGES FOLDER
+@st.cache_data(show_spinner=False)
 def get_high_quality_images():
     high_quality_list_buz = []
     
-    # Strictly allowed premium scenic images to prevent low-quality renders
     premium_allowed_buz = [
         "pexels-dirrez-3672776.jpg",
         "pexels-joran-quinten-2125825-3775331.jpg",
@@ -38,14 +38,13 @@ def get_high_quality_images():
     
     try:
         if os.path.exists("images"):
-            all_files_buz = os.listdir("images")
+            all_files_buz = sorted(os.listdir("images"))
             for f in all_files_buz:
                 if f in premium_allowed_buz:
                     high_quality_list_buz.append(os.path.join("images", f))
     except Exception:
         pass
     
-    # Fallback to premium high-res photography if local folder lacks assets
     if not high_quality_list_buz:
         high_quality_list_buz = [
             "https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2032&auto=format&fit=crop",
@@ -57,6 +56,7 @@ def get_high_quality_images():
         ]
     return high_quality_list_buz
 
+@st.cache_data(show_spinner=False)
 def get_image_base64(path):
     if path.startswith("http"):
         return path
@@ -69,8 +69,6 @@ def get_image_base64(path):
     except Exception:
         return ""
 
-hq_images_buz = get_high_quality_images()
-
 # INITIALIZE STATE & ROUTING
 if "authenticated" not in st.session_state: st.session_state.authenticated = False
 if "user_data" not in st.session_state: st.session_state.user_data = {"name": "", "farm": "", "location": "", "email": ""}
@@ -80,16 +78,18 @@ if "last_document" not in st.session_state: st.session_state.last_document = Non
 
 current_page_buz = "ONBOARDING" if not st.session_state.authenticated else st.session_state.get("current_page", "CHAT")
 
-page_bg_mapping_buz = {
-    "ONBOARDING": hq_images_buz[0] if len(hq_images_buz) > 0 else hq_images_buz[-1],
-    "CHAT": hq_images_buz[1] if len(hq_images_buz) > 1 else hq_images_buz[0],
-    "CATALOGUE": hq_images_buz[2] if len(hq_images_buz) > 2 else hq_images_buz[0],
-    "RESERVE ORDER": hq_images_buz[3] if len(hq_images_buz) > 3 else hq_images_buz[0],
-    "GLOBAL FEED": hq_images_buz[4] if len(hq_images_buz) > 4 else hq_images_buz[0],
-    "FEATURES": hq_images_buz[5] if len(hq_images_buz) > 5 else hq_images_buz[0]
-}
+if "bg_mapping_buz" not in st.session_state:
+    hq_images_buz = get_high_quality_images()
+    st.session_state.bg_mapping_buz = {
+        "ONBOARDING": hq_images_buz[0] if len(hq_images_buz) > 0 else hq_images_buz[-1],
+        "CHAT": hq_images_buz[1] if len(hq_images_buz) > 1 else hq_images_buz[0],
+        "CATALOGUE": hq_images_buz[2] if len(hq_images_buz) > 2 else hq_images_buz[0],
+        "RESERVE ORDER": hq_images_buz[3] if len(hq_images_buz) > 3 else hq_images_buz[0],
+        "GLOBAL FEED": hq_images_buz[4] if len(hq_images_buz) > 4 else hq_images_buz[0],
+        "FEATURES": hq_images_buz[5] if len(hq_images_buz) > 5 else hq_images_buz[0]
+    }
 
-bg_path_buz = page_bg_mapping_buz.get(current_page_buz, hq_images_buz[0])
+bg_path_buz = st.session_state.bg_mapping_buz.get(current_page_buz, "images/maxresdefault.jpg")
 bg_b64_buz = get_image_base64(bg_path_buz)
 
 # DYNAMIC SIDEBAR VISIBILITY: Hide Sidebar Completely on Onboarding
@@ -105,7 +105,6 @@ st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
-    /* Force Dark Mode & Background Image globally */
     .stApp {{
         background: linear-gradient(180deg, rgba(6, 9, 15, 0.4) 0%, rgba(6, 9, 15, 0.85) 100%), url('{bg_b64_buz}') !important;
         background-size: cover !important;
@@ -113,21 +112,15 @@ st.markdown(f"""
         background-attachment: fixed !important;
     }}
     
-    /* Hide top header band */
     header[data-testid="stHeader"] {{ background: transparent !important; }}
 
-    /* Force all text to white/off-white to combat Light Mode */
     html, body, p, span, div, label, h1, h2, h3, h4, h5, h6, li {{
         font-family: 'Plus Jakarta Sans', sans-serif;
         color: #F8FAFC !important;
     }}
     
-    h1, h2, h3 {{ 
-        font-family: 'Playfair Display', serif !important; 
-        font-weight: 700 !important; 
-    }}
+    h1, h2, h3 {{ font-family: 'Playfair Display', serif !important; font-weight: 700 !important; }}
 
-    /* Cinematic Typography Blocks */
     .main-title {{
         font-family: 'Playfair Display', serif !important;
         font-size: 4rem;
@@ -154,10 +147,8 @@ st.markdown(f"""
         margin: 2rem 0 1.5rem 0;
     }}
 
-    /* Dynamic Sidebar Injection */
     {sidebar_css_buz}
 
-    /* True Transparent Frosted Sidebar */
     [data-testid="stSidebar"] {{ 
         background-color: rgba(10, 15, 25, 0.35) !important; 
         border-right: 1px solid rgba(255, 255, 255, 0.1) !important; 
@@ -166,7 +157,6 @@ st.markdown(f"""
     }}
     [data-testid="stSidebar"] > div:first-child {{ background-color: transparent !important; }}
     
-    /* Form Inputs & Chat Box */
     .stTextInput input, .stNumberInput input, .stSelectbox div[data-baseweb="select"], [data-testid="stChatInput"] {{
         background-color: rgba(15, 23, 42, 0.65) !important; 
         color: #FFFFFF !important; 
@@ -179,7 +169,6 @@ st.markdown(f"""
         box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.3) !important; 
     }}
 
-    /* Action Buttons */
     .stButton button, .stDownloadButton button, [data-testid="stFormSubmitButton"] button {{
         background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important; 
         color: #FFFFFF !important; 
@@ -196,7 +185,6 @@ st.markdown(f"""
         background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
     }}
 
-    /* Immersive Chat Messages */
     [data-testid="stChatMessage"] {{
         background-color: rgba(15, 23, 42, 0.6) !important;
         backdrop-filter: blur(16px) !important;
@@ -208,34 +196,21 @@ st.markdown(f"""
         box-shadow: 0 10px 25px rgba(0,0,0,0.2) !important;
     }}
 
-    /* Bottom Chat Container Glass Effect Overrides White Bar */
     [data-testid="stBottom"] > div {{
         background-color: rgba(10, 15, 25, 0.3) !important;
         backdrop-filter: blur(25px) !important;
         -webkit-backdrop-filter: blur(25px) !important;
         border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
     }}
-    
-    /* Extreme Overrides for Light Mode Chat Input Bug */
     [data-testid="stChatInput"] > div {{
         background-color: rgba(15, 23, 42, 0.9) !important;
         border: 1px solid rgba(255, 255, 255, 0.2) !important;
         border-radius: 16px !important;
     }}
-    [data-testid="stChatInput"] textarea {{
-        color: #FFFFFF !important;
-        -webkit-text-fill-color: #FFFFFF !important;
-        background-color: transparent !important;
-    }}
-    [data-testid="stChatInput"] textarea::placeholder {{
-        color: #94A3B8 !important;
-        -webkit-text-fill-color: #94A3B8 !important;
-    }}
-    [data-testid="stChatInput"] svg {{
-        fill: #34D399 !important;
-    }}
+    [data-testid="stChatInput"] textarea {{ color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF !important; background-color: transparent !important; }}
+    [data-testid="stChatInput"] textarea::placeholder {{ color: #94A3B8 !important; -webkit-text-fill-color: #94A3B8 !important; }}
+    [data-testid="stChatInput"] svg {{ fill: #34D399 !important; }}
     
-    /* Chat Quick Guide & Status Boards */
     .glass-panel {{
         background: rgba(15, 23, 42, 0.55);
         backdrop-filter: blur(16px);
@@ -255,26 +230,14 @@ st.markdown(f"""
         margin: 4px 8px 4px 0;
     }}
 
-    /* Fast Glass Cards (Catalogue & Features) */
     .glass-card {{
-        background: rgba(15, 23, 42, 0.55); 
-        backdrop-filter: blur(16px); 
-        -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.15); 
-        border-top: 3px solid #34D399;
-        padding: 26px; 
-        border-radius: 20px; 
-        margin-bottom: 18px; 
-        height: 100%;
-        box-shadow: 0 15px 35px -10px rgba(0,0,0,0.5);
-        transition: transform 0.3s ease, border-color 0.3s ease;
+        background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.15); border-top: 3px solid #34D399;
+        padding: 26px; border-radius: 20px; margin-bottom: 18px; height: 100%;
+        box-shadow: 0 15px 35px -10px rgba(0,0,0,0.5); transition: transform 0.3s ease, border-color 0.3s ease;
     }}
-    .glass-card:hover {{
-        transform: translateY(-4px);
-        border-color: rgba(52, 211, 153, 0.6);
-    }}
+    .glass-card:hover {{ transform: translateY(-4px); border-color: rgba(52, 211, 153, 0.6); }}
 
-    /* Document/Quote Box */
     .quote-box {{
         background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.15); padding: 30px; border-radius: 20px; margin-top: 20px;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
@@ -284,8 +247,8 @@ st.markdown(f"""
     .quote-box td {{ padding: 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }}
 
     .custom-warning {{ background-color: rgba(16, 185, 129, 0.15); color: #34D399 !important; padding: 18px; border-radius: 16px; margin: 15px 0; border: 1px solid rgba(16, 185, 129, 0.4); }}
+    .success-receipt {{ background-color: rgba(52, 211, 153, 0.2); color: #F8FAFC !important; padding: 22px; border-radius: 16px; margin: 20px 0; border: 1px solid rgba(52, 211, 153, 0.6); font-size: 1.1rem; text-align: center; box-shadow: 0 10px 30px rgba(16, 185, 129, 0.2); }}
 
-    /* Footer */
     .footer {{ text-align: center; margin-top: 80px; padding: 30px 0; border-top: 1px solid rgba(255, 255, 255, 0.1); background: rgba(4, 6, 11, 0.6); backdrop-filter: blur(12px); }}
 </style>
 """, unsafe_allow_html=True)
@@ -297,28 +260,21 @@ def get_platform_stats():
     try:
         conn_buz = sqlite3.connect("the_farm_agent.db")
         c_buz = conn_buz.cursor()
-        
         c_buz.execute("SELECT COUNT(DISTINCT farmer_id) FROM popia_encrypted_clients")
         total_users_buz = c_buz.fetchone()[0] or 0
-        
         c_buz.execute("SELECT AVG(user_total) FROM (SELECT SUM(quantity) as user_total FROM orders_commitment GROUP BY farmer_id)")
         avg_items_buz = c_buz.fetchone()[0] or 0
-        
         c_buz.execute("SELECT delivery_location FROM popia_encrypted_clients GROUP BY delivery_location ORDER BY COUNT(*) DESC LIMIT 1")
         top_loc_row_buz = c_buz.fetchone()
         top_loc_buz = top_loc_row_buz[0] if top_loc_row_buz else "N/A"
-        
         conn_buz.close()
         return total_users_buz, round(avg_items_buz, 1), top_loc_buz
     except Exception:
         return 0, 0.0, "N/A"
 
 def login_with_receipt(receipt_str):
-    try:
-        order_id_buz = int(''.join(filter(str.isdigit, receipt_str)))
-    except ValueError:
-        return None
-        
+    try: order_id_buz = int(''.join(filter(str.isdigit, receipt_str)))
+    except ValueError: return None
     try:
         conn_buz = sqlite3.connect("the_farm_agent.db")
         c_buz = conn_buz.cursor()
@@ -330,7 +286,6 @@ def login_with_receipt(receipt_str):
         """, (order_id_buz,))
         row_buz = c_buz.fetchone()
         conn_buz.close()
-        
         if row_buz:
             email_guess_buz = f"{row_buz[0].replace(' ', '').lower()}@farm.co.za"
             return {"name": row_buz[0], "farm": "Registered Farm", "location": row_buz[2], "email": email_guess_buz}
@@ -454,7 +409,6 @@ def generate_and_send(doc_type, location_input, phone, email_input, receipt_no):
     return st.session_state.last_document
 
 def render_email_status(doc):
-    st.success(f"{doc['doc_type']} ready. Choose how you want to send it.")
     st.markdown(f"<a class='stButton' href='{doc['gmail']}' target='_blank'><button>OPEN IN GMAIL</button></a> &nbsp; <a class='stButton' href='{doc['mailto']}' target='_blank'><button>OPEN IN OTHER EMAIL APP</button></a>", unsafe_allow_html=True)
     st.caption("Opens a ready-written email to your client. Press send to finish.")
 
@@ -502,11 +456,9 @@ st.markdown("""
 
 
 # VIEWS
-
 if not st.session_state.authenticated:
     st.markdown("<div class='section-header'>CLIENT ONBOARDING</div>", unsafe_allow_html=True)
 
-    # Live Database Statistics Dashboard
     tot_users_buz, avg_items_buz, top_location_buz = get_platform_stats()
     st.markdown(f"""
     <div style="display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap;">
@@ -535,9 +487,7 @@ if not st.session_state.authenticated:
                 client_farm_buz = st.text_input("FARM / COMPANY", key="onboard_farm")
                 client_location_buz = st.text_input("LOCATION", key="onboard_loc")
                 client_email_buz = st.text_input("EMAIL ADDRESS", key="onboard_email")
-
                 st.markdown("""<div class="custom-warning">Hello fellow farmer. For the agent to work effectively we need permission to work with your data. Click yes to continue or leave.</div>""", unsafe_allow_html=True)
-
                 permission_buz = st.checkbox("I GRANT PERMISSION")
                 submitted_buz = st.form_submit_button("AUTHORIZE ENTRY")
 
@@ -573,41 +523,6 @@ if not st.session_state.authenticated:
 elif page_selection_buz == "CHAT":
     st.markdown("<div class='section-header'>STRATEGIC AGENT</div>", unsafe_allow_html=True)
 
-    # HTML Nav Button (No Python reruns, pure frontend toggle)
-    components.html("""
-    <style>
-        .nav-toggle-btn {
-            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-            color: #FFFFFF;
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
-            border: none;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .nav-toggle-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 25px rgba(16, 185, 129, 0.45);
-            background: linear-gradient(135deg, #059669 0%, #047857 100%);
-        }
-        body { margin: 0; padding: 0; background: transparent; }
-    </style>
-    <button class="nav-toggle-btn" onclick="
-        let btn = window.parent.document.querySelector(`[data-testid='stSidebarCollapsedControl']`) || 
-                  window.parent.document.querySelector(`[data-testid='collapsedControl']`);
-        if(btn) btn.click();
-    ">
-        OPEN MENU NAVIGATION
-    </button>
-    """, height=50)
-
-    # AGRONOMIC CONDITIONS WIDGET ON CHAT PAGE
     st.markdown("""
     <div style="display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap;">
         <div class="glass-panel" style="flex: 1; text-align: center; margin-bottom: 0;">
@@ -629,7 +544,6 @@ elif page_selection_buz == "CHAT":
     </div>
     """, unsafe_allow_html=True)
 
-    # QUICK GUIDE 
     st.markdown("""
     <div class="chat-quick-guide">
         <div style="font-family:'Playfair Display', serif; font-weight: 700; font-size: 1.1rem; color: #34D399; margin-bottom: 12px; letter-spacing: 1px;">QUICK START GUIDE</div>
@@ -716,10 +630,10 @@ elif page_selection_buz == "CHAT":
         
         if st.button(f"PREPARE {chat_doc_type_buz.upper()}", key="chat_send_btn"):
             with st.spinner("Preparing document..."):
+                # We save a pending sync receipt number so the visual works before the DB is synced
                 result_buz = generate_and_send(chat_doc_type_buz, st.session_state.user_data["location"], chat_phone_buz or "Not provided", st.session_state.user_data["email"], "PENDING-DB-SYNC")
             render_email_status(result_buz)
             
-            # FULL DOCUMENT AND QR PREVIEW IN CHAT
             st.markdown(result_buz["doc_html"], unsafe_allow_html=True)
             if result_buz.get("bank_qrs"):
                 st.markdown("<h4 style='color: #34D399; margin-top: 20px; font-family: \"Playfair Display\", serif;'>SCAN TO OPEN YOUR BANK</h4>", unsafe_allow_html=True)
@@ -805,7 +719,16 @@ elif page_selection_buz == "RESERVE ORDER":
             if order_ids_buz:
                 receipt_no_buz = f"C{order_ids_buz[0]}"
                 generate_and_send(doc_type_buz, location_input_buz, phone_buz, email_input_buz, receipt_no_buz)
-                clear_basket_buz() 
+                clear_basket_buz()
+                
+                # Highly visible success banner with the login receipt number
+                st.markdown(f"""
+                <div class="success-receipt">
+                    <b>TRANSACTION COMPLETE</b><br><br>
+                    Please save your specific Receipt Number to securely log in and bypass registration in the future:<br>
+                    <span style="font-size: 2rem; font-weight: 800; letter-spacing: 2px;">{receipt_no_buz}</span>
+                </div>
+                """, unsafe_allow_html=True)
             else:
                 st.error("Failed to commit transaction to database. Stock may be depleted.")
 
@@ -826,7 +749,6 @@ elif page_selection_buz == "RESERVE ORDER":
 elif page_selection_buz == "GLOBAL FEED":
     st.markdown("<div class='section-header'>GLOBAL FEED & MARKET CONDITIONS</div>", unsafe_allow_html=True)
 
-    # Daily Commodity Prices
     st.markdown("""
     <div style="background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(16px); padding: 30px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.15); margin-bottom: 25px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);">
         <h3 style="color: #34D399; font-family: 'Playfair Display', serif; margin-top:0; font-size: 1.5rem;">DAILY SAFEX COMMODITY PRICES</h3>
