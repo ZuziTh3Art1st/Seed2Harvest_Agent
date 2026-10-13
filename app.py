@@ -4,8 +4,8 @@ import html
 import base64
 from urllib.parse import quote
 import requests
-import sqlite3
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import qrcode
 from io import BytesIO
@@ -16,7 +16,7 @@ import The_Database as db
 st.set_page_config(
     page_title="Seed 2 Harvest | Cinematic Intelligence",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
 # HELPER TO GET ONLY PREMIUM HIGH QUALITY IMAGES FROM IMAGES FOLDER
@@ -37,8 +37,8 @@ def get_high_quality_images():
     
     try:
         if os.path.exists("images"):
-            all_files_buz = os.listdir("images")
-            for f in all_files_buz:
+            all_files = os.listdir("images")
+            for f in all_files:
                 if f in premium_allowed_buz:
                     high_quality_list_buz.append(os.path.join("images", f))
     except Exception:
@@ -61,10 +61,10 @@ def get_image_base64(path):
         return path
     try:
         with open(path, "rb") as f:
-            b64_buz = base64.b64encode(f.read()).decode()
-        ext_buz = path.rsplit(".", 1)[-1].lower()
-        mime_buz = "image/png" if ext_buz == "png" else ("image/webp" if ext_buz == "webp" else "image/jpeg")
-        return f"data:{mime_buz};base64,{b64_buz}"
+            b64 = base64.b64encode(f.read()).decode()
+        ext = path.rsplit(".", 1)[-1].lower()
+        mime = "image/png" if ext == "png" else ("image/webp" if ext == "webp" else "image/jpeg")
+        return f"data:{mime};base64,{b64}"
     except Exception:
         return ""
 
@@ -77,7 +77,7 @@ if "messages" not in st.session_state: st.session_state.messages = []
 if "basket" not in st.session_state: st.session_state.basket = {}
 if "last_document" not in st.session_state: st.session_state.last_document = None
 
-current_page_buz = "ONBOARDING" if not st.session_state.authenticated else st.session_state.get("current_page", "CHAT")
+current_page = "ONBOARDING" if not st.session_state.authenticated else st.session_state.get("current_page", "CHAT")
 
 page_bg_mapping_buz = {
     "ONBOARDING": hq_images_buz[0] if len(hq_images_buz) > 0 else hq_images_buz[-1],
@@ -88,7 +88,7 @@ page_bg_mapping_buz = {
     "FEATURES": hq_images_buz[5] if len(hq_images_buz) > 5 else hq_images_buz[0]
 }
 
-bg_path_buz = page_bg_mapping_buz.get(current_page_buz, hq_images_buz[0])
+bg_path_buz = page_bg_mapping_buz.get(current_page, hq_images_buz[0])
 bg_b64_buz = get_image_base64(bg_path_buz)
 
 # DYNAMIC SIDEBAR VISIBILITY: Hide Sidebar Completely on Onboarding
@@ -165,15 +165,15 @@ st.markdown(f"""
     }}
     [data-testid="stSidebar"] > div:first-child {{ background-color: transparent !important; }}
     
-    /* Form Inputs & Chat Box */
-    .stTextInput input, .stNumberInput input, .stSelectbox div[data-baseweb="select"], [data-testid="stChatInput"] {{
+    /* Form Inputs & Regular Fields */
+    .stTextInput input, .stNumberInput input, .stSelectbox div[data-baseweb="select"] {{
         background-color: rgba(15, 23, 42, 0.65) !important; 
         color: #FFFFFF !important; 
         border: 1px solid rgba(255, 255, 255, 0.2) !important; 
         border-radius: 12px !important;
         backdrop-filter: blur(10px) !important;
     }}
-    .stTextInput input:focus, [data-testid="stChatInput"]:focus-within {{ 
+    .stTextInput input:focus {{ 
         border-color: #34D399 !important; 
         box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.3) !important; 
     }}
@@ -207,21 +207,31 @@ st.markdown(f"""
         box-shadow: 0 10px 25px rgba(0,0,0,0.2) !important;
     }}
 
-    /* Bottom Chat Container Glass Effect Overrides White Bar */
+    /* Bottom Chat Container Glass Effect */
     [data-testid="stBottom"] > div {{
         background-color: rgba(10, 15, 25, 0.3) !important;
         backdrop-filter: blur(25px) !important;
         -webkit-backdrop-filter: blur(25px) !important;
         border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
     }}
-    .stChatInputContainer {{
-        background-color: rgba(15, 23, 42, 0.75) !important;
+    
+    /* Extreme Overrides for Light Mode Chat Input Bug */
+    [data-testid="stChatInput"] > div {{
+        background-color: rgba(15, 23, 42, 0.9) !important;
         border: 1px solid rgba(255, 255, 255, 0.2) !important;
         border-radius: 16px !important;
     }}
-    .stChatInputContainer textarea {{
+    [data-testid="stChatInput"] textarea {{
         color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
         background-color: transparent !important;
+    }}
+    [data-testid="stChatInput"] textarea::placeholder {{
+        color: #94A3B8 !important;
+        -webkit-text-fill-color: #94A3B8 !important;
+    }}
+    [data-testid="stChatInput"] svg {{
+        fill: #34D399 !important;
     }}
     
     /* Chat Quick Guide & Status Boards */
@@ -562,6 +572,13 @@ if not st.session_state.authenticated:
 elif page_selection_buz == "CHAT":
     st.markdown("<div class='section-header'>STRATEGIC AGENT</div>", unsafe_allow_html=True)
 
+    # HTML Nav Button
+    st.markdown("""
+        <button class="nav-toggle-btn" onclick="window.parent.document.querySelector('[data-testid=\\'collapsedControl\\']').click()">
+            OPEN MENU NAVIGATION
+        </button>
+    """, unsafe_allow_html=True)
+
     # AGRONOMIC CONDITIONS WIDGET ON CHAT PAGE
     st.markdown("""
     <div style="display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap;">
@@ -730,7 +747,6 @@ elif page_selection_buz == "RESERVE ORDER":
         elif not active_items_buz:
             st.error("Cannot generate documentation with an empty basket.")
         else:
-            # Wire to DB execution for true data persistence and real receipt generation
             order_ids_buz = []
             for prod_buz, qty_buz in active_items_buz:
                 success_buz, result_buz = db.process_order_transaction(
@@ -744,10 +760,9 @@ elif page_selection_buz == "RESERVE ORDER":
                     order_ids_buz.append(str(result_buz["order_id"]))
             
             if order_ids_buz:
-                # Use first order ID for the official receipt number
                 receipt_no_buz = f"C{order_ids_buz[0]}"
                 generate_and_send(doc_type_buz, location_input_buz, phone_buz, email_input_buz, receipt_no_buz)
-                clear_basket_buz() # Clear basket on success
+                clear_basket_buz() 
             else:
                 st.error("Failed to commit transaction to database. Stock may be depleted.")
 
@@ -789,7 +804,6 @@ elif page_selection_buz == "GLOBAL FEED":
             
         st.write(f"Delivery Location: **{user_loc_buz}**")
 
-        # Full Google Maps iframe integration
         encoded_loc_buz = quote(user_loc_buz)
         gmaps_iframe_buz = f"""
         <iframe 
