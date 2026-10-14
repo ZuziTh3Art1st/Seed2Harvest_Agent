@@ -87,6 +87,10 @@ def init_db():
     # Inject Baseline Inventory ONLY if table is empty
     cursor_buz.execute("SELECT COUNT(*) FROM inventory_master")
     if cursor_buz.fetchone()[0] == 0:
+        
+        # LOCK THE RANDOM GENERATOR SO DASHBOARD STATS NEVER CHANGE ON REBOOT
+        random.seed(42)
+        
         seed_inventory_buz = [
             ("SKU-BIO-250", "BioBoost 250ml", "Organic Fertilizer", 930, 18500, "5ml per 1L of water weekly"),
             ("SKU-BIO-1L", "BioBoost 1L", "Organic Fertilizer", 500, 52000, "20ml per 5L of water bi-weekly"),
