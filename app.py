@@ -290,7 +290,6 @@ def login_with_receipt(receipt_str):
         conn_buz = sqlite3.connect("the_farm_agent.db")
         c_buz = conn_buz.cursor()
         
-        # Format the user's "C" receipt back into the UUID fragment for the SQL lookup
         search_str = receipt_str.replace("C", "").lower() + "%"
         
         c_buz.execute("""
@@ -649,7 +648,7 @@ elif page_selection_buz == "CHAT":
     1. Ground your advice in the certified product catalog:
     {catalog_context_buz}
     2. YOU ALREADY KNOW THE CLIENT'S NAME, FARM, LOCATION, AND EMAIL. DO NOT, UNDER ANY CIRCUMSTANCES, ASK FOR THIS INFORMATION AGAIN. If processing an order, simply confirm you have their details on file. Do not invent missing parameters.
-    3. You can see the basket above. When the client says "from my basket" or "the basket", use those items and totals.
+    3. You can see the LIVE basket above. If the basket text says "EMPTY", DO NOT pretend the user has items in it. You MUST explicitly tell the user to navigate to the "CATALOGUE" page on the left sidebar to add items before you can generate an invoice.
     4. You cannot send emails or generate files yourself. When the client wants an invoice or a QR code quotation, confirm the basket contents and total, then tell them a button will appear below the chat to prepare the document.
     5. Keep responses professional, clear, and actionable. Do not use emojis.
     """
@@ -696,7 +695,8 @@ elif page_selection_buz == "CHAT":
     _recent_buz = " ".join(m["content"].lower() for m in st.session_state.messages[-3:])
     _chat_items_buz = [(p, q) for p, q in st.session_state.basket.items() if q > 0]
     
-    if _chat_items_buz and any(w in _recent_buz for w in _billing_words_buz):
+    # Show the document panel if billing is discussed, regardless of whether the basket is empty
+    if any(w in _recent_buz for w in _billing_words_buz):
         st.markdown("---")
         st.markdown("<div class='section-header'>SEND DOCUMENT FROM BASKET</div>", unsafe_allow_html=True)
         _, _, _gt_buz = basket_totals_buz()
@@ -706,7 +706,7 @@ elif page_selection_buz == "CHAT":
         
         if st.button(f"PREPARE {chat_doc_type_buz.upper()}", key="chat_send_btn"):
             if not _chat_items_buz:
-                st.error("Cannot generate documentation with an empty basket.")
+                st.error("Your basket is empty. Please navigate to the CATALOGUE page on the left menu to add products before generating a document.")
             else:
                 with st.spinner("Processing transaction and preparing document..."):
                     order_ids_buz = []
