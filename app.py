@@ -695,19 +695,18 @@ elif page_selection_buz == "CHAT":
     _recent_buz = " ".join(m["content"].lower() for m in st.session_state.messages[-3:])
     _chat_items_buz = [(p, q) for p, q in st.session_state.basket.items() if q > 0]
     
-    # Show the document panel if billing is discussed, regardless of whether the basket is empty
     if any(w in _recent_buz for w in _billing_words_buz):
         st.markdown("---")
-        st.markdown("<div class='section-header'>SEND DOCUMENT FROM BASKET</div>", unsafe_allow_html=True)
-        _, _, _gt_buz = basket_totals_buz()
-        st.caption(f"Basket total incl. VAT: R{_gt_buz:.2f}. It will be addressed to {st.session_state.user_data['email']}.")
-        chat_doc_type_buz = st.radio("Document type", ["Official Invoice", "QR Code Quotation Summary"], horizontal=True, key="chat_doc_type")
-        chat_phone_buz = st.text_input("Contact number (optional)", key="chat_phone")
-        
-        if st.button(f"PREPARE {chat_doc_type_buz.upper()}", key="chat_send_btn"):
-            if not _chat_items_buz:
-                st.error("Your basket is empty. Please navigate to the CATALOGUE page on the left menu to add products before generating a document.")
-            else:
+        if not _chat_items_buz:
+            st.warning("⚠️ **Your basket is currently empty.** The system cannot generate an invoice for R0.00. Please navigate to the **CATALOGUE** via the menu to add products to your basket first.")
+        else:
+            st.markdown("<div class='section-header'>SEND DOCUMENT FROM BASKET</div>", unsafe_allow_html=True)
+            _, _, _gt_buz = basket_totals_buz()
+            st.caption(f"Basket total incl. VAT: R{_gt_buz:.2f}. It will be addressed to {st.session_state.user_data['email']}.")
+            chat_doc_type_buz = st.radio("Document type", ["Official Invoice", "QR Code Quotation Summary"], horizontal=True, key="chat_doc_type")
+            chat_phone_buz = st.text_input("Contact number (optional)", key="chat_phone")
+            
+            if st.button(f"PREPARE {chat_doc_type_buz.upper()}", key="chat_send_btn"):
                 with st.spinner("Processing transaction and preparing document..."):
                     order_ids_buz = []
                     for prod_buz, qty_buz in _chat_items_buz:
