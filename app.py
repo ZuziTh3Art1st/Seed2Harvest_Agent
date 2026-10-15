@@ -648,9 +648,14 @@ elif page_selection_buz == "CHAT":
     1. Ground your advice in the certified product catalog:
     {catalog_context_buz}
     2. YOU ALREADY KNOW THE CLIENT'S NAME, FARM, LOCATION, AND EMAIL. DO NOT, UNDER ANY CIRCUMSTANCES, ASK FOR THIS INFORMATION AGAIN. If processing an order, simply confirm you have their details on file. Do not invent missing parameters.
-    3. You can see the LIVE basket above. If the basket text says "EMPTY", DO NOT pretend the user has items in it. You MUST explicitly tell the user to navigate to the "CATALOGUE" page on the left sidebar to add items before you can generate an invoice.
-    4. You cannot send emails or generate files yourself. When the client wants an invoice or a QR code quotation, confirm the basket contents and total, then tell them a button will appear below the chat to prepare the document.
+    3. You can see the LIVE basket above. If it says "EMPTY" and they ask for a quote, you can either guide them to the CATALOGUE page, or offer to add the products for them right here in the chat.
+    4. You cannot send emails or generate files yourself. Tell them to use the "PREPARE" button below the chat.
     5. Keep responses professional, clear, and actionable. Do not use emojis.
+    6. AGENTIC ACTION (ADDING TO BASKET): You have the power to add items to the user's basket directly! 
+    If the user asks you to add, order, or buy a product, append this exact hidden command at the very end of your reply:
+    ||UPDATE: Exact Product Name : Quantity||
+    Example: ||UPDATE: NitroGrow Pellets 10kg : 76||
+    You MUST use the exact product names from the catalogue. You can output multiple commands if needed. Do not place anything after the command block.
     """
 
     if not st.session_state.messages:
@@ -684,10 +689,37 @@ elif page_selection_buz == "CHAT":
                     temperature=0.3,
                     max_tokens=900
                 )
-                reply_buz = chat_completion_buz.choices[0].message.content
+                original_reply_buz = chat_completion_buz.choices[0].message.content
+                reply_buz = original_reply_buz
+                
+                # Conversational Commerce AI Interceptor
+                updates_buz = re.findall(r'\|\|UPDATE:\s*(.*?)\s*:\s*(\d+)\|\|', reply_buz)
+                basket_was_updated = False
+                
+                if updates_buz:
+                    for prod_name, qty_str in updates_buz:
+                        prod_name = prod_name.strip()
+                        qty = int(qty_str)
+                        if prod_name in price_map_buz:
+                            if qty > 0:
+                                st.session_state.basket[prod_name] = qty
+                                st.session_state[f"cat_{prod_name}"] = qty
+                            else:
+                                st.session_state.basket.pop(prod_name, None)
+                                st.session_state[f"cat_{prod_name}"] = 0
+                            basket_was_updated = True
+                    
+                    # Scrub the hidden API command from the text the user actually sees
+                    reply_buz = re.sub(r'\|\|UPDATE:.*?\|\|', '', reply_buz).strip()
+
                 with st.chat_message("assistant"):
                     st.markdown(reply_buz)
                 st.session_state.messages.append({"role": "assistant", "content": reply_buz})
+                
+                # If the AI modified the basket, instantly reload the page to update the Sidebar UI
+                if basket_was_updated:
+                    st.rerun()
+                    
             except Exception as err:
                 st.error(f"Inference Engine Error: {err}")
 
