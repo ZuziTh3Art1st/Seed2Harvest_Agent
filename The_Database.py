@@ -7,6 +7,7 @@ DB_NAME_BUZ = "the_farm_agent.db"
 
 # ==========================================
 # ENTERPRISE SECURITY: AES-256 SIMULATION LAYER
+# (SRS Section 3.3 & Level 4 Architecture)
 # ==========================================
 def aes_256_encrypt_mock(plaintext: str) -> str:
     """Simulates AES-256 application-layer encryption for POPIA compliance."""
@@ -38,7 +39,7 @@ def init_db():
     conn_buz = get_connection()
     cursor_buz = conn_buz.cursor()
 
-    # 1. POPIA Compliance Isolated Client Table
+    # 1. POPIA Compliance Isolated Client Table (clients_vault)
     cursor_buz.execute("""
         CREATE TABLE IF NOT EXISTS clients_vault (
             farmer_uuid VARCHAR(36) PRIMARY KEY,
@@ -49,7 +50,7 @@ def init_db():
         )
     """)
 
-    # 2. Master Inventory Table 
+    # 2. Master Inventory Table (inventory_master)
     cursor_buz.execute("""
         CREATE TABLE IF NOT EXISTS inventory_master (
             product_sku VARCHAR(50) PRIMARY KEY,
@@ -61,7 +62,7 @@ def init_db():
         )
     """)
 
-    # 3. Transactional Order Commitment Table
+    # 3. Transactional Order Commitment Table (orders_ledger)
     cursor_buz.execute("""
         CREATE TABLE IF NOT EXISTS orders_ledger (
             order_id VARCHAR(36) PRIMARY KEY,
@@ -75,7 +76,7 @@ def init_db():
         )
     """)
 
-    # 4. Dialog Audit Table
+    # 4. Dialog Audit Table (dialog_audit)
     cursor_buz.execute("""
         CREATE TABLE IF NOT EXISTS dialog_audit (
             chat_session_id VARCHAR(36) NOT NULL,
@@ -84,12 +85,10 @@ def init_db():
         )
     """)
 
-    # Inject Baseline Inventory ONLY if table is empty
+    # Inject baseline inventory & seed baseline 115 users ONLY if database is brand new
     cursor_buz.execute("SELECT COUNT(*) FROM inventory_master")
     if cursor_buz.fetchone()[0] == 0:
-        
-        # LOCK THE RANDOM GENERATOR SO DASHBOARD STATS NEVER CHANGE ON REBOOT
-        random.seed(42)
+        random.seed(42)  # Seeded for consistent presentation baseline
         
         seed_inventory_buz = [
             ("SKU-BIO-250", "BioBoost 250ml", "Organic Fertilizer", 930, 18500, "5ml per 1L of water weekly"),
@@ -105,7 +104,7 @@ def init_db():
             VALUES (?, ?, ?, ?, ?, ?)
         """, seed_inventory_buz)
 
-        # Inject 115 Dummy Users & Transactions
+        # Baseline 115 Seed Users
         first_names_buz = ["Jan", "Piet", "Johan", "Willem", "Hendrik", "Thabo", "Sipho", "Lungile", "Zanele", "Ashley", "Michael", "Sarah", "David", "Emma", "James"]
         last_names_buz = ["Smit", "Van Der Merwe", "Botha", "Ndlovu", "Khumalo", "Dlamini", "Venter", "Nel", "Buzuzi", "Nkosi"]
         locations_buz = ["Stellenbosch, Western Cape", "Paarl, Western Cape", "Malmesbury, Western Cape", "Ceres, Western Cape", "Tzaneen, Limpopo", "Bethlehem, Free State", "Upington, Northern Cape", "Nelspruit, Mpumalanga"]
@@ -140,26 +139,54 @@ def init_db():
     conn_buz.close()
 
 # ==========================================
-# TRANSACTION EXECUTIONS
+# CLIENT ONBOARDING & REGISTRATION TRANSACTION
+# ==========================================
+def register_new_client(full_name: str, phone: str, location: str) -> str:
+    """Explicitly registers a new client into the POPIA encrypted vault on onboarding."""
+    conn_buz = get_connection()
+    cursor_buz = conn_buz.cursor()
+    
+    name_parts = full_name.strip().split(" ", 1)
+    first_name_buz = name_parts[0]
+    last_name_buz = name_parts[1] if len(name_parts) > 1 else "Farmer"
+    farmer_uuid_buz = str(uuid.uuid4())
+    
+    cursor_buz.execute("""
+        INSERT INTO clients_vault (farmer_uuid, first_name, last_name, contact_phone, delivery_address)
+        VALUES (?, ?, ?, ?, ?)
+    """, (
+        farmer_uuid_buz, 
+        aes_256_encrypt_mock(first_name_buz), 
+        aes_256_encrypt_mock(last_name_buz), 
+        aes_256_encrypt_mock(phone), 
+        aes_256_encrypt_mock(location)
+    ))
+    conn_buz.commit()
+    conn_buz.close()
+    return farmer_uuid_buz
+
+# ==========================================
+# INVENTORY & ORDER TRANSACTIONS
 # ==========================================
 def fetch_inventory():
     conn_buz = get_connection()
     cursor_buz = conn_buz.cursor()
-    cursor_buz.execute("SELECT product_name, category, stock_quantity, (unit_price_cents / 100.0) AS unit_price, dosage_guideline FROM inventory_master")
+    cursor_buz.execute("""
+        SELECT product_name, category, stock_quantity, (unit_price_cents / 100.0) AS unit_price, dosage_guideline 
+        FROM inventory_master
+    """)
     rows_buz = cursor_buz.fetchall()
     conn_buz.close()
     return rows_buz
 
-def process_order_transaction(farmer_name, phone, location, product_name, quantity):
+def process_order_transaction(farmer_name, phone, location, product_name, quantity, existing_uuid=None):
     conn_buz = get_connection()
     cursor_buz = conn_buz.cursor()
-    name_parts = farmer_name.split(" ", 1)
-    first_name_buz = name_parts[0]
-    last_name_buz = name_parts[1] if len(name_parts) > 1 else "Unknown"
     
     try:
         cursor_buz.execute("BEGIN IMMEDIATE")
         
+        # 1. Verify Stock
         cursor_buz.execute("SELECT product_sku, stock_quantity, unit_price_cents FROM inventory_master WHERE product_name = ?", (product_name,))
         item_buz = cursor_buz.fetchone()
         if not item_buz:
@@ -171,15 +198,23 @@ def process_order_transaction(farmer_name, phone, location, product_name, quanti
             conn_buz.rollback()
             return False, f"Insufficient stock: {stock_quantity_buz} units available, {quantity} requested."
 
-        farmer_uuid_buz = str(uuid.uuid4())
-        cursor_buz.execute("""
-            INSERT INTO clients_vault (farmer_uuid, first_name, last_name, contact_phone, delivery_address)
-            VALUES (?, ?, ?, ?, ?)
-        """, (farmer_uuid_buz, aes_256_encrypt_mock(first_name_buz), aes_256_encrypt_mock(last_name_buz), aes_256_encrypt_mock(phone), aes_256_encrypt_mock(location)))
+        # 2. Maintain or create farmer_uuid
+        farmer_uuid_buz = existing_uuid
+        if not farmer_uuid_buz:
+            name_parts = farmer_name.split(" ", 1)
+            fname_buz = name_parts[0]
+            lname_buz = name_parts[1] if len(name_parts) > 1 else "Farmer"
+            farmer_uuid_buz = str(uuid.uuid4())
+            cursor_buz.execute("""
+                INSERT INTO clients_vault (farmer_uuid, first_name, last_name, contact_phone, delivery_address)
+                VALUES (?, ?, ?, ?, ?)
+            """, (farmer_uuid_buz, aes_256_encrypt_mock(fname_buz), aes_256_encrypt_mock(lname_buz), aes_256_encrypt_mock(phone), aes_256_encrypt_mock(location)))
 
+        # 3. Deduct Stock
         new_stock_buz = stock_quantity_buz - quantity
         cursor_buz.execute("UPDATE inventory_master SET stock_quantity = ? WHERE product_sku = ?", (new_stock_buz, product_sku_buz))
 
+        # 4. Commit Order Ledger
         order_id_buz = str(uuid.uuid4())
         total_cost_cents_buz = unit_price_cents_buz * quantity
         
@@ -195,7 +230,8 @@ def process_order_transaction(farmer_name, phone, location, product_name, quanti
             "product": product_name,
             "quantity": quantity,
             "total_cost": (total_cost_cents_buz / 100.0),
-            "remaining_stock": new_stock_buz
+            "remaining_stock": new_stock_buz,
+            "farmer_uuid": farmer_uuid_buz
         }
     except Exception as e:
         conn_buz.rollback()
