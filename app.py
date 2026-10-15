@@ -282,9 +282,6 @@ def get_platform_stats():
         return 0, 0.0, "N/A"
 
 def login_with_receipt(receipt_str):
-    if not receipt_str or not receipt_str.startswith("C"):
-        return None
-        
     try:
         conn_buz = sqlite3.connect("the_farm_agent.db")
         c_buz = conn_buz.cursor()
@@ -313,28 +310,19 @@ def login_with_receipt(receipt_str):
 
 # DYNAMIC AGRONOMIC TELEMETRY & SAFEX COMMODITY SIMULATION
 def get_live_agronomic_telemetry(location_str: str):
-    """Generates realistic time-of-day and location-influenced sensor telemetry."""
     now = datetime.datetime.now()
     hour = now.hour
     minute = now.minute
     
-    # Diurnal temperature cycle: peaks around 14:00, coolest at 05:00
     base_temp = 17.0 + 8.0 * max(0.0, 1.0 - abs(hour - 14) / 9.0)
     temp_c = round(base_temp + (minute % 5) * 0.2, 1)
-    
-    # Soil moisture inverse to diurnal heat
     soil_moisture = round(45.0 - (temp_c - 17.0) * 0.7 + (minute % 3) * 0.3, 1)
-    
-    # Soil pH dynamic oscillation around sweet spot (6.6 - 6.9)
     soil_ph = round(6.7 + ((hour + minute) % 7) * 0.03, 2)
-    
-    # Next rain forecast in days
     next_rain_days = max(1, (hour * 3 + minute) % 5 + 1)
     
     return temp_c, soil_moisture, soil_ph, next_rain_days
 
 def get_live_commodity_prices():
-    """Returns dynamic SAFEX commodity spot prices with live daily deltas."""
     now = datetime.datetime.now()
     seed_day = now.day + now.hour
     
@@ -586,7 +574,6 @@ if not st.session_state.authenticated:
                 elif "@" not in client_email_buz or "." not in client_email_buz.split("@")[-1]:
                     st.error("Please enter a valid email address.")
                 else:
-                    # IMMEDIATELY REGISTER TO DATABASE -> INCREMENTS 115 TO 116+
                     new_uuid = db.register_new_client(client_name_buz, client_email_buz, client_location_buz)
                     st.session_state.user_data = {
                         "name": client_name_buz, 
@@ -618,7 +605,6 @@ if not st.session_state.authenticated:
 elif page_selection_buz == "CHAT":
     st.markdown("<div class='section-header'>STRATEGIC AGENT</div>", unsafe_allow_html=True)
 
-    # DYNAMIC AGRONOMIC TELEMETRY WIDGET (LIVE IOT STREAM)
     loc_val = st.session_state.user_data.get("location") or "Western Cape"
     temp_val, moist_val, ph_val, rain_val = get_live_agronomic_telemetry(loc_val)
     
@@ -644,7 +630,6 @@ elif page_selection_buz == "CHAT":
     </div>
     """, unsafe_allow_html=True)
 
-    # VOICE INPUT (WEB SPEECH API REQ-05) & MENU TOGGLE CONTROLS
     components.html("""
     <style>
         .btn-panel { display: flex; gap: 12px; margin-bottom: 10px; font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -753,7 +738,6 @@ elif page_selection_buz == "CHAT":
     </script>
     """, height=55)
 
-    # QUICK GUIDE
     st.markdown("""
     <div class="chat-quick-guide">
         <div style="font-family:'Playfair Display', serif; font-weight: 700; font-size: 1.1rem; color: #34D399; margin-bottom: 12px; letter-spacing: 1px;">QUICK START GUIDE</div>
@@ -802,7 +786,6 @@ elif page_selection_buz == "CHAT":
         with st.chat_message(msg_buz["role"]):
             st.markdown(msg_buz["content"])
 
-    # CHAT INPUT
     if user_prompt_buz := st.chat_input("MESSAGE"):
         with st.chat_message("user"):
             st.markdown(user_prompt_buz)
@@ -828,7 +811,6 @@ elif page_selection_buz == "CHAT":
                 original_reply_buz = chat_completion_buz.choices[0].message.content
                 reply_buz = original_reply_buz
                 
-                # Conversational Commerce AI Interceptor
                 updates_buz = re.findall(r'\|\|UPDATE:\s*(.*?)\s*:\s*(\d+)\|\|', reply_buz)
                 basket_was_updated = False
                 
@@ -850,7 +832,6 @@ elif page_selection_buz == "CHAT":
                     st.markdown(reply_buz)
                 st.session_state.messages.append({"role": "assistant", "content": reply_buz})
                 
-                # BROWSER SPEECH SYNTHESIS (READ ALOUD REQ-05)
                 clean_speech_text = re.sub(r'[*_#`\n]', ' ', reply_buz).replace('"', '\\"')[:300]
                 components.html(f"""
                 <script>
@@ -870,7 +851,6 @@ elif page_selection_buz == "CHAT":
             except Exception as err:
                 st.error(f"Inference Engine Error: {err}")
 
-    # DOCUMENT ACTION GATEWAY
     _billing_words_buz = ("invoice", "quote", "quotation", "qr", "email", "bill", "order")
     _recent_buz = " ".join(m["content"].lower() for m in st.session_state.messages[-3:])
     _chat_items_buz = [(p, q) for p, q in st.session_state.basket.items() if q > 0]
@@ -993,9 +973,19 @@ elif page_selection_buz == "RESERVE ORDER":
 elif page_selection_buz == "GLOBAL FEED":
     st.markdown("<div class='section-header'>GLOBAL FEED & MARKET CONDITIONS</div>", unsafe_allow_html=True)
 
-    # DYNAMIC SAFEX COMMODITY MARKET TICKER
     commodities = get_live_commodity_prices()
     now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M SAST')
+    
+    rows_html = ""
+    for c in commodities:
+        color = '#34D399' if c['is_up'] else '#F87171'
+        rows_html += f"""<div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding: 12px 0;">
+<span style="font-weight: 500;">{c['name']}</span>
+<div>
+<span style="color: {color}; font-size: 0.82rem; margin-right: 14px; font-weight: 700;">{c['delta']}</span>
+<b style="color: #F8FAFC; font-size: 1.05rem;">{c['price']}</b>
+</div>
+</div>"""
     
     st.markdown(f"""
     <div style="background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(16px); padding: 30px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.15); margin-bottom: 25px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);">
@@ -1004,15 +994,7 @@ elif page_selection_buz == "GLOBAL FEED":
             <span style="color: #94A3B8; font-size: 0.78rem;">LIVE FEED • LAST SYNC: {now_time}</span>
         </div>
         <p style="color: #94A3B8; font-size: 0.85rem; margin-bottom: 15px;">Simulated spot market closing prices (ZAR/TON) with daily variance delta</p>
-        {"".join([f'''
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding: 12px 0;">
-                <span style="font-weight: 500;">{c['name']}</span>
-                <div>
-                    <span style="color: {'#34D399' if c['is_up'] else '#F87171'}; font-size: 0.82rem; margin-right: 14px; font-weight: 700;">{c['delta']}</span>
-                    <b style="color: #F8FAFC; font-size: 1.05rem;">{c['price']}</b>
-                </div>
-            </div>
-        ''' for c in commodities])}
+        {rows_html}
     </div>
     """, unsafe_allow_html=True)
 
