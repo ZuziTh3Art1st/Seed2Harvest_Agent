@@ -282,6 +282,9 @@ def get_platform_stats():
         return 0, 0.0, "N/A"
 
 def login_with_receipt(receipt_str):
+    if not receipt_str or not receipt_str.startswith("C"):
+        return None
+        
     try:
         conn_buz = sqlite3.connect("the_farm_agent.db")
         c_buz = conn_buz.cursor()
@@ -422,10 +425,14 @@ def set_basket_qty_buz(product_name):
     qty_buz = st.session_state.get(f"cat_{product_name}", 0)
     if qty_buz and qty_buz > 0: st.session_state.basket[product_name] = int(qty_buz)
     else: st.session_state.basket.pop(product_name, None)
+    st.session_state.last_document = None  # Wipes old invoice on basket update
 
 def clear_basket_buz():
     st.session_state.basket = {}
-    for k_buz in [k_buz for k_buz in st.session_state.keys() if k_buz.startswith("cat_")]: del st.session_state[k_buz]
+    for k_buz in list(st.session_state.keys()):
+        if k_buz.startswith("cat_"):
+            del st.session_state[k_buz]
+    st.session_state.last_document = None  # Wipes old invoice on manual clear
 
 def payment_lines(inv_no, grand_total):
     lines_buz = [f"Payment reference: {inv_no}", f"Amount to pay: R{grand_total:.2f}"]
@@ -486,7 +493,13 @@ def render_persistent_document(doc_buz, key_prefix):
                 st.markdown(f"**{bank_name_buz}**  \n[Open site]({bank_url_buz})")
         st.caption("Banks do not allow a public link that opens a pre-filled payment, so each code opens the bank. Log in, choose Pay, and use the reference and amount shown above.")
         
-    st.download_button("DOWNLOAD DOCUMENT (HTML)", data=doc_buz["email_html"].encode("utf-8"), file_name=f"{doc_buz['inv_no']}.html", mime="text/html", key=f"{key_prefix}_dl_btn")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.download_button("DOWNLOAD DOCUMENT (HTML)", data=doc_buz["email_html"].encode("utf-8"), file_name=f"{doc_buz['inv_no']}.html", mime="text/html", key=f"{key_prefix}_dl_btn")
+    with col2:
+        if st.button("🔄 CLEAR RECEIPT & START NEW ORDER", key=f"{key_prefix}_clear_btn"):
+            clear_basket_buz()
+            st.rerun()
 
 # SIDEBAR NAVIGATION
 if st.session_state.authenticated:
@@ -846,16 +859,18 @@ elif page_selection_buz == "CHAT":
                 """, height=0)
 
                 if basket_was_updated:
+                    st.session_state.last_document = None  # Instantly wipes any stale invoices when starting a new order
                     st.rerun()
                     
             except Exception as err:
                 st.error(f"Inference Engine Error: {err}")
 
-    _billing_words_buz = ("invoice", "quote", "quotation", "qr", "email", "bill", "order")
-    _recent_buz = " ".join(m["content"].lower() for m in st.session_state.messages[-3:])
+    # DOCUMENT ACTION GATEWAY - ONLY triggers specifically when final checkout/invoicing is requested
+    _billing_words_buz = ("invoice", "quote", "quotation", "qr", "bill", "checkout", "pay")
+    _recent_buz = " ".join(m["content"].lower() for m in st.session_state.messages[-1:]) # Only check the very last message to prevent lingering
     _chat_items_buz = [(p, q) for p, q in st.session_state.basket.items() if q > 0]
     
-    if any(w in _recent_buz for w in _billing_words_buz):
+    if any(w in _recent_buz for w in _billing_words_buz) and not st.session_state.last_document:
         st.markdown("---")
         if not _chat_items_buz:
             st.warning("⚠️ **Your basket is currently empty.** The system cannot generate an invoice for R0.00. Please navigate to the **CATALOGUE** via the menu, or tell the agent 'Add [product]' to load your cart directly.")
@@ -884,10 +899,12 @@ elif page_selection_buz == "CHAT":
                     if order_ids_buz:
                         receipt_no_buz = f"C{order_ids_buz[0]}"
                         generate_and_send(chat_doc_type_buz, st.session_state.user_data["location"], chat_phone_buz or "Not provided", st.session_state.user_data["email"], receipt_no_buz)
+                        st.rerun() # Refresh to instantly lock in the persistent document UI
                     else:
                         st.error("Failed to commit transaction to database. Stock may be depleted.")
                         
     if st.session_state.last_document:
+        st.markdown("---")
         render_persistent_document(st.session_state.last_document, "chat")
 
 elif page_selection_buz == "CATALOGUE":
@@ -942,32 +959,33 @@ elif page_selection_buz == "RESERVE ORDER":
             st.write(f"- {qty_buz}x {item_buz}")
 
     st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("PROCESS TRANSACTION & PREPARE DOCUMENT"):
-        if not phone_buz or not email_input_buz:
-            st.error("Contact number and email are required to process the order and dispatch documentation.")
-        elif not active_items_buz:
-            st.error("Cannot generate documentation with an empty basket.")
-        else:
-            order_ids_buz = []
-            for prod_buz, qty_buz in active_items_buz:
-                success_buz, result_buz = db.process_order_transaction(
-                    farmer_name=st.session_state.user_data["name"],
-                    phone=phone_buz,
-                    location=location_input_buz,
-                    product_name=prod_buz,
-                    quantity=qty_buz,
-                    existing_uuid=st.session_state.user_data.get("farmer_uuid")
-                )
-                if success_buz:
-                    order_ids_buz.append(str(result_buz["order_id"]))
-            
-            if order_ids_buz:
-                receipt_no_buz = f"C{order_ids_buz[0]}"
-                generate_and_send(doc_type_buz, location_input_buz, phone_buz, email_input_buz, receipt_no_buz)
+    if not st.session_state.last_document:
+        if st.button("PROCESS TRANSACTION & PREPARE DOCUMENT"):
+            if not phone_buz or not email_input_buz:
+                st.error("Contact number and email are required to process the order and dispatch documentation.")
+            elif not active_items_buz:
+                st.error("Cannot generate documentation with an empty basket.")
             else:
-                st.error("Failed to commit transaction to database. Stock may be depleted.")
-
-    if st.session_state.last_document:
+                order_ids_buz = []
+                for prod_buz, qty_buz in active_items_buz:
+                    success_buz, result_buz = db.process_order_transaction(
+                        farmer_name=st.session_state.user_data["name"],
+                        phone=phone_buz,
+                        location=location_input_buz,
+                        product_name=prod_buz,
+                        quantity=qty_buz,
+                        existing_uuid=st.session_state.user_data.get("farmer_uuid")
+                    )
+                    if success_buz:
+                        order_ids_buz.append(str(result_buz["order_id"]))
+                
+                if order_ids_buz:
+                    receipt_no_buz = f"C{order_ids_buz[0]}"
+                    generate_and_send(doc_type_buz, location_input_buz, phone_buz, email_input_buz, receipt_no_buz)
+                    st.rerun() # Refresh to instantly lock in the persistent document UI
+                else:
+                    st.error("Failed to commit transaction to database. Stock may be depleted.")
+    else:
         render_persistent_document(st.session_state.last_document, "reserve")
 
 elif page_selection_buz == "GLOBAL FEED":
